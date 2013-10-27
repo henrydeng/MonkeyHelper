@@ -1,4 +1,4 @@
-pydroid-tool
-============
+pyadk
+=====
 
-Python code for controlling Android toolchain
+Provide python access for Android Development Tools (adb, aapt, etc)
