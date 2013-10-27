@@ -1,9 +1,3 @@
-#!/usr/bin/python
-
-import os
-import sys
-import time
-import json
 import helper
 
 # ----------------------public settings:
@@ -11,13 +5,16 @@ import helper
 target_device=None
 
 # execute adb command specific to the target phone
-def _adb(list, mute=True):
-	return _cmd(["adb","-s",target_device]+list, mute)
+def adb(cmdlist, mute=True):
+	return helper._cmd(["adb","-s",target_device]+cmdlist, mute)
+
+def aapt(cmdlist, mute=True):
+	return helper._cmd(["aapt"]+cmdlist, mute)
 
 # dump the info about an apk
 def aapt_dump(apk):
-	(ret,output) = _cmd(["aapt",'dump','badging',filepath], 0)
-	_die(ret, "Failed to retrieve info of "+filepath)
+	(ret,output) = aapt(['dump','badging',apk], False)
+	assert ret == 0, "Failed to retrieve the info of "+apk
 	pkg = mainact = None
 	for line in output.splitlines():
 		if line.startswith('package:'):
@@ -28,64 +25,48 @@ def aapt_dump(apk):
 			# get the main activity
 			(_, _, line) = line.partition("name='")
 			mainact = line[:line.index("\'")]
-	_die(pkg is None, 'Abnormal pkg:'+filepath+'\n'+output)
+	assert pkg is not None, 'Abnormal pkg:'+apk+'\n'+output
 	return (pkg, mainact)
 
 # ----------------------APIs:
 # launch an installed app with short name
-def adb_iaunch_app(pkg, mainact)
+def adb_launch_app(pkg, mainact):
 	if mainact is None:
 		global _warning
 		print 'Warning: no main activity to launch'
 		_warning = True
 		return 1
 	launcher=pkg+"/"+mainact
-	(ret, output) = _adb(["shell","am","start","-W",launcher],0)
+	(_, output) = adb(["shell","am","start","-W",launcher],0)
 	# parse the output to get exec time
 	for line in output.splitlines():
 		if line.startswith('TotalTime: '):
-			exectime = int(line[line.find(' '):])
-			_launch_log.append(exectime)
 			break
 	return 0
 
 # install an app with a given short name
 def adb_install_app(apk):
-	(ret, output) = _adb(["install",apk], False)
+	(ret, output) = adb(["install",apk], False)
 	if ret:
-		print 'Warning: failed to install', filepath
+		print 'Warning: failed to install', apk
 		print output
 		global _warning
 		_warning = True
-	else:
-		global _appdb
-		print "Install", shortname, filepath
-		_appdb[shortname]=_get_apkinfo(realpath)
 
 # uninstall an app with a short name
-def adb_uninstall_app(shortname):
+def adb_uninstall_app(pkg):
 	global _appdb
-	if shortname not in _appdb:
-		print 'Warning: failed to uninstall', shortname
-		print 'Unknown short name'
+	(ret, output) = adb(['shell','pm','uninstall',pkg])
+	if ret:
+		print output
 		_warning = True
-	else:
-		(pkg, mainact) = _appdb[shortname]
-		(ret, output) = _adb(['shell','pm','uninstall',pkg])
-		if ret:
-			print 'Warning: failed to uninstall', shortname
-			print output
-			_warning = True
-		else:
-			print "Uninstall", shortname
-			del _appdb[shortname]
 
 def check_adk():
-	assert _cmd(["aapt","version"])[0] == 0,"aapt not found!"
-	assert _cmd(["adb","version"])[0] == 0,"adb not found!"
+	assert helper._cmd(["aapt","version"])[0] == 0,"aapt not found!"
+	assert helper._cmd(["adb","version"])[0] == 0,"adb not found!"
 
 def adb_find_device(name=None,nr=-1,ask_for_nr=True):
-	(_, output) = _cmd(['adb','devices'], False)
+	(_, output) = helper._cmd(['adb','devices'], False)
 
 	# parse output to get a list of devices
 	(_, _, output) = output.partition('List of devices attached')
@@ -98,13 +79,10 @@ def adb_find_device(name=None,nr=-1,ask_for_nr=True):
 	else:
 		i = 0
 		selected = len(devlist) + 1
-		for device in device_list:
+		for device in devlist:
 			print i,":",device
 			i = i + 1
-		while selected >= len(device_list):
-			try:
-				selected = input('Choose a target device: ')
-			except KetyboardInterrupt:
-				sys.exit(1)
-		target_device = device_list[selected]	
+		while selected >= len(devlist):
+			selected = input('Choose a target device: ')
+		target_device = devlist[selected]	
 	return target_device

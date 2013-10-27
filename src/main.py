@@ -1,10 +1,11 @@
-#!/usr/bin/python
 import urllib
 import json
 import sys
+import pyadk
 
-# get the file path belonging to the db entry
 def get_file_path(dbentry, fname):
+	"""get the file path belonging to the db entry"""
+	return ""
 
 def write_file_once(dbentry, fname, data):
 	# f = open(get_file_path(dbentry, fname), 'w')
@@ -13,7 +14,8 @@ def write_file_once(dbentry, fname, data):
 	f.write(data)
 	f.close()
 
-def main(url):
+def create_dbentry(url):
+	dbentry = {}
 	# fetch the apk
 	apk = get_file_path(dbentry, "apk.apk")
 	urllib.urlretrieve(url, apk)

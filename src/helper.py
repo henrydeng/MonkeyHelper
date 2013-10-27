@@ -1,14 +1,17 @@
 import subprocess
+import os
+
+_fnull = open(os.devnull, "w")
 
 # ----------------------helper functions:
 # execute a raw command and mute all outputs
-def _cmd(list, mute=1):
+def _cmd(cmdlist, mute=1):
 	if mute:
-		proc = subprocess.Popen(list, stdout = _fnull, stderr = _fnull)
+		proc = subprocess.Popen(cmdlist, stdout = _fnull, stderr = _fnull)
 		proc.communicate()
 		return (proc.returncode, None)
 	else:
-		proc = subprocess.Popen(list, stdout = subprocess.PIPE, 
+		proc = subprocess.Popen(cmdlist, stdout = subprocess.PIPE, 
 				stderr = subprocess.PIPE)
 		(output, erroutput) = proc.communicate()
 		return (proc.returncode, erroutput + output)
