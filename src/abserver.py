@@ -14,11 +14,14 @@ def write_file_once(dbentry, fname, data):
 	f.write(data)
 	f.close()
 
-def create_dbentry(url):
+def download_apk(url, apkpath):
+	urllib.urlretrieve(url, apkpath)
+	
+
+def create_dbentry(apk):
 	dbentry = {}
 	# fetch the apk
 	apk = get_file_path(dbentry, "apk.apk")
-	urllib.urlretrieve(url, apk)
 	dbentry["apk"] = True 
 
 	# get the jar
