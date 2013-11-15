@@ -29,3 +29,4 @@ nosetests.xml
 
 # Translations
 *.mo
+*$py.class
