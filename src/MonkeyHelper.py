@@ -4,16 +4,17 @@ import os
 # helper: execute a raw command and selectively mute stdout and stderr
 def _cmd(cmdlist, mute=1):
 	if mute:
-		with open(os.devnull, "w") as fnull:
-			proc = subprocess.Popen(cmdlist, stdout = fnull, stderr = fnull)
-			proc.communicate()
-			return (proc.returncode, None)
+		fnull = open(os.devnull, "w")
+		proc = subprocess.Popen(cmdlist, stdout = fnull, stderr = fnull)
+		proc.communicate()
+		fnull.close()
+		return (proc.returncode, None)
 	else:
 		proc = subprocess.Popen(cmdlist, stdout = subprocess.PIPE, 
 				stderr = subprocess.PIPE)
 		(output, erroutput) = proc.communicate()
 		return (proc.returncode, erroutput + output)
-
+	
 class MonkeyHelper:
 	# call the aapt tool with arbitrary commands
 	@staticmethod
