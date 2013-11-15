@@ -1,7 +1,7 @@
 import urllib
 import json
 import sys
-import pyadk
+from MonkeyHelper import MonkeyHelper
 
 def get_file_path(dbentry, fname):
 	"""get the file path belonging to the db entry"""
@@ -27,7 +27,7 @@ def create_dbentry(apk):
 	# get the jar
 
 	# get basic info
-	info = pyadk.aapt_dump(apk)
+	info = MonkeyHelper.aapt_dump(apk)
 	dbentry.update(info)
 
 	# write the db in case the tool chain is broken
@@ -38,7 +38,4 @@ def create_dbentry(apk):
 	# update the db
 	write_file_once(dbentry, "entry", json.dumps(dbentry))
 
-def prepare():
-	pyadk.check_adk()
-	pyadk.adb_find_device()
 

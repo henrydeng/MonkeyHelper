@@ -1,9 +1,4 @@
 #!/usr/bin/python
-import pyadk 
+from MonkeyHelper import MonkeyHelper 
 
-pyadk.check_adk()
-pyadk.adb_find_device()
-
-pyadk.adb_install_app("1.apk")
-
-pyadk.adb_launch_app("test")
+MonkeyHelper.aapt_dump("1.apk")
