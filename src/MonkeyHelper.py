@@ -40,9 +40,13 @@ class MonkeyHelper:
 		assert pkg is not None, 'Abnormal pkg:'+apk+'\n'+output
 		return (pkg, mainact)
 
+# enhanced MonkeyDevice
 class EMonkeyDevice:
+	DOWN_AND_UP = MonkeyDevice.DOWN_AND_UP
+	DOWN = MonkeyDevice.DOWN
+	UP = MonkeyDevice.UP
 	def __init__(self):
-		dev = MonkeyRunner.waitForConnection()
+		self.dev = MonkeyRunner.waitForConnection()
 	def broadcastIntent(self, uri, action, data, mimetype, extras, component, flags):
 		self.dev.broadcastIntent(uri, action, data, mimetype, extras, component, flags)
 	def drag(self, start, end, duration, steps):
