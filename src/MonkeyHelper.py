@@ -1,5 +1,6 @@
 import subprocess
 import os
+from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 
 # helper: execute a raw command and selectively mute stdout and stderr
 def _cmd(cmdlist, mute=1):
@@ -39,3 +40,36 @@ class MonkeyHelper:
 		assert pkg is not None, 'Abnormal pkg:'+apk+'\n'+output
 		return (pkg, mainact)
 
+class EMonkeyDevice:
+	def __init__(self):
+		dev = MonkeyRunner.waitForConnection()
+	def broadcastIntent(self, uri, action, data, mimetype, extras, component, flags):
+		self.dev.broadcastIntent(uri, action, data, mimetype, extras, component, flags)
+	def drag(self, start, end, duration, steps):
+		return self.dev.drag(start, end, duration, steps)
+	def getProperty(self, key):
+		return self.dev.getProperty(key)
+	def getSystemProperty(self, key):
+		return self.dev.getSystemProperty(key)
+	def installPackage(self, path):
+		self.dev.installPackage(path)
+	def instrument(self, className, args):
+		return self.dev.instrument(className, args)
+	def press(self, name, t):
+		self.dev.press(name, t)
+	def reboot(self, into):
+		self.dev.reboot(into)
+	def removePackage(self, package):
+		self.dev.removePackage(package)
+	def shell(self, cmd):
+		return self.dev.shell(cmd)
+	def startActivity(self, uri, action, data, mimetype, extras, component, flags):
+		self.dev.startActivity(uri, action, data, mimetype, extras, component, flags)
+	def takeSnapshot(self):
+		return self.dev.takeSnapshot()
+	def touch(self, x, y, t):
+		self.dev.touch(x, y, t)
+	def type(self, message):
+		self.dev.type(message)
+	def wake(self):
+		self.dev.wake()
