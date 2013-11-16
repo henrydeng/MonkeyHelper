@@ -1,7 +1,5 @@
 #!/usr/bin/python
-import sys
-import os
-import inspect
+import os, sys, inspect
 def module_path():
     ''' returns the module path without the use of __file__.
     from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
@@ -29,5 +27,7 @@ device.drag ( (540,400), (95,400), 0.05, 100)
 MonkeyRunner.sleep(1)
 # press the menu key
 device.press('KEYCODE_MENU', EMonkeyDevice.DOWN_AND_UP)
+MonkeyRunner.sleep(1)
+device.touch( 95, 400, EMonkeyDevice.DOWN_AND_UP)
 
 print "Finishing the test"
