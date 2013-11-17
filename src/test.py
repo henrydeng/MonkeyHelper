@@ -8,7 +8,6 @@ sys.path.append(module_path())
 
 # The MonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
 from MonkeyHelper import EMonkeyDevice 
-from com.android.monkeyrunner import MonkeyRunner
 
 # starting the application and test
 print "Starting the monkeyrunner script"
@@ -18,16 +17,8 @@ print "Starting the monkeyrunner script"
 # automatically connect to the current device
 device = EMonkeyDevice()
 
-MonkeyRunner.sleep(1)
-# slide right
-device.drag ( (95,400), (540,400), 0.05, 100)
-MonkeyRunner.sleep(1)
-# slide left
-device.drag ( (540,400), (95,400), 0.05, 100)
-MonkeyRunner.sleep(1)
-# press the menu key
-device.press('KEYCODE_MENU', EMonkeyDevice.DOWN_AND_UP)
-MonkeyRunner.sleep(1)
-device.touch( 95, 400, EMonkeyDevice.DOWN_AND_UP)
+device.wake().sleep(1).unlockScreen().sleep(1)
+device.slideRight().sleep(1).slideLeft().sleep(1)
+device.press('KEYCODE_MENU').sleep(1).touch(95, 400).sleep(1)
 
 print "Finishing the test"

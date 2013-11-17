@@ -47,10 +47,16 @@ class EMonkeyDevice:
 	UP = MonkeyDevice.UP
 	def __init__(self):
 		self.dev = MonkeyRunner.waitForConnection()
+		self.displayWidth = int(self.getProperty("display.width"))
+		self.displayHeight = int(self.getProperty("display.height"))
+		print "Device attached"
+		print "displayWidth = ", self.displayWidth
+		print "displayHeight = ", self.displayHeight
 	def broadcastIntent(self, uri, action, data, mimetype, extras, component, flags):
 		self.dev.broadcastIntent(uri, action, data, mimetype, extras, component, flags)
 	def drag(self, start, end, duration, steps):
-		return self.dev.drag(start, end, duration, steps)
+		self.dev.drag(start, end, duration, steps)
+		return self
 	def getProperty(self, key):
 		return self.dev.getProperty(key)
 	def getSystemProperty(self, key):
@@ -59,8 +65,9 @@ class EMonkeyDevice:
 		self.dev.installPackage(path)
 	def instrument(self, className, args):
 		return self.dev.instrument(className, args)
-	def press(self, name, t):
+	def press(self, name, t = DOWN_AND_UP):
 		self.dev.press(name, t)
+		return self
 	def reboot(self, into):
 		self.dev.reboot(into)
 	def removePackage(self, package):
@@ -71,9 +78,31 @@ class EMonkeyDevice:
 		self.dev.startActivity(uri, action, data, mimetype, extras, component, flags)
 	def takeSnapshot(self):
 		return self.dev.takeSnapshot()
-	def touch(self, x, y, t):
+	def touch(self, x, y, t = DOWN_AND_UP):
 		self.dev.touch(x, y, t)
+		return self
 	def type(self, message):
 		self.dev.type(message)
+		return self
 	def wake(self):
 		self.dev.wake()
+		return self
+	def slideLeft(self):
+		h = self.displayHeight / 2
+		w1 = self.displayWidth * 7 / 8
+		w2 = self.displayHeight * 3 / 8
+		self.dev.drag ((w1, h), (w2, h), 0.05, 100)
+		return self
+	def slideRight(self):
+		h = self.displayHeight / 2
+		w1 = self.displayWidth * 3 / 8
+		w2 = self.displayHeight * 7 / 8
+		self.dev.drag ((w1, h), (w2, h), 0.05, 100)
+		return self
+	def unlockScreen(self):
+		h = self.displayHeight * 6 / 7
+		self.dev.drag((self.displayWidth / 2, h), (self.displayWidth, h), 0.05, 100)
+		return self
+	def sleep(self, seconds):
+		MonkeyRunner.sleep(seconds)
+		return self
