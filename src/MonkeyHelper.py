@@ -68,8 +68,12 @@ class EMonkeyDevice:
 	def press(self, name, t = DOWN_AND_UP):
 		self.dev.press(name, t)
 		return self
-	def reboot(self, into):
+	def reboot(self, into = "None"):
 		self.dev.reboot(into)
+	def rebootBootloader(self):
+		self.dev.reboot("bootloader")
+	def rebootRecovery(self):
+		self.dev.reboot("Recovery")
 	def removePackage(self, package):
 		self.dev.removePackage(package)
 	def shell(self, cmd):
@@ -106,3 +110,22 @@ class EMonkeyDevice:
 	def sleep(self, seconds):
 		MonkeyRunner.sleep(seconds)
 		return self
+	def getInstalledPackage(self):
+		raw = str(self.shell("pm list packages"))
+		l = []
+		for line in raw.split('\n'):
+			if line.startswith("package:"):
+				l.append(line[8:].rstrip())
+		return l
+	def killAllBgApps(self):
+		self.shell("am kill-all")
+	def pushFile(self, path):
+		#return self.shell("push " + path)
+		pass
+	def pullFile(self, devicePath, localPath):
+		# return self.shell("pull %s %s" % (devicePath, localPath))
+		pass
+	def getSystemInfo(self):
+		d = {"android_version": self.getProperty("build.version.release")}
+		return d
+	

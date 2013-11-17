@@ -16,7 +16,7 @@ print "Starting the monkeyrunner script"
 
 # automatically connect to the current device
 device = EMonkeyDevice()
-
+print device.getInstalledPackage()
 device.wake().sleep(1).unlockScreen().sleep(1)
 device.slideRight().sleep(1).slideLeft().sleep(1)
 device.press('KEYCODE_MENU').sleep(1).touch(95, 400).sleep(1)
