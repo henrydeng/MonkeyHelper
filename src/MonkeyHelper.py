@@ -94,14 +94,14 @@ class EMonkeyDevice:
 	def slideLeft(self):
 		h = self.displayHeight / 2
 		w1 = self.displayWidth * 7 / 8
-		w2 = self.displayHeight * 3 / 8
-		self.dev.drag ((w1, h), (w2, h), 0.05, 100)
+		w2 = self.displayHeight * 1 / 8
+		self.dev.drag ((w1, h), (w2, h), 0.01, 100)
 		return self
 	def slideRight(self):
 		h = self.displayHeight / 2
-		w1 = self.displayWidth * 3 / 8
+		w1 = self.displayWidth * 1 / 8
 		w2 = self.displayHeight * 7 / 8
-		self.dev.drag ((w1, h), (w2, h), 0.05, 100)
+		self.dev.drag ((w1, h), (w2, h), 0.01, 100)
 		return self
 	def unlockScreen(self):
 		h = self.displayHeight * 6 / 7
