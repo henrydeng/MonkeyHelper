@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Haha</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>haha</title>
+	<style>
+	body {
+	margin: 0px;
+	padding: 0px;
+	}
+	</style>
+</head>
+<body>
+	<div id="container"></div>
+    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
+    <script>
+	// Kinetic Example
+	var stage = new Kinetic.Stage({
+	    container: 'container',
+	    width: 360,
+	    height: 480
+	});
+	var layer = new Kinetic.Layer();
+	stage.add(layer);
+
+	var data = [{x:30,y:30},{x:180,y:60},{x:80,y:180},{x:100,y:40}];
+	var c = null;
+
+	for (var i = 0; i < data.length; ++i) {
+		c = newCircle(data[i].x, data[i].y, 3, "blue", c);
+	}
+
+	function newCircle(x, y, r, fill, beforeShape) {
+
+	    var circle = new Kinetic.Circle({
+	        x: x,
+	        y: y,
+	        radius: r,
+	        fill: fill,
+	        stroke: fill,
+	        strokeWidth: 3,
+	        draggable: true
+	    });
+	    layer.add(circle);
+
+	    if (beforeShape) {
+	        var connector = new Kinetic.Line({
+	            points: [
+	                beforeShape.getX(),
+	                beforeShape.getY(),
+	                x,
+	                y
+	            ],
+	            stroke: "blue",
+	            strokeWidth: 3
+	        });
+	        layer.add(connector);
+	        connector.moveToBottom();
+	        beforeShape.afterShape = circle;
+	        beforeShape.afterConnector = connector;
+	    }
+	    circle.beforeShape = beforeShape;
+	    circle.beforeConnector = connector;
+	    circle.afterShape = null;
+	    circle.afterConnector = null;
+	    circle.on("dragmove", function () {
+	        if (this.beforeShape) {
+	            this.beforeConnector.setPoints([
+	                this.beforeShape.getX(),
+	                this.beforeShape.getY(),
+	                this.getX(),
+	                this.getY()
+	            ]);
+	        }
+	        if (this.afterShape) {
+	            this.afterConnector.setPoints([
+	                this.getX(),
+	                this.getY(),
+	                this.afterShape.getX(),
+	                this.afterShape.getY()
+	            ]);
+	        }
+	    });
+
+	    layer.draw();
+	    return (circle);
+	}
+	</script>
+</body>
+</html>
