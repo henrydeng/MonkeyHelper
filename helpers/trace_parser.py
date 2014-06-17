@@ -1,6 +1,14 @@
 #!/usr/bin/python
-import sys, re
+import os, sys, re, inspect
+from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+# The EMonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
+from EMonkeyHelper import EMonkeyDevice
 
+def module_path():
+    ''' returns the module path without the use of __file__.
+    from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
+    return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+sys.path.append(module_path())
 # the doc for the MT protocol can be found here:
 # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
@@ -93,16 +101,28 @@ def processRawTrace(tracePath, myHandlers, evDev):
             print "[WARN] Unknown device: " + str(tp)
 
 def main():
+    # starting the application and test
+    print "Starting the monkeyrunner script"
+    # EMonkeyHelper.aapt_dump("1.apk")
+    # automatically connect to the current device
+    device = EMonkeyDevice()
+    #device=MonkeyRunner.waitForConnection()
+    print device.getInstalledPackage()
+    # the doc for the MT protocol can be found here:
+    # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
+    # A type A multi-touch screen
     if len(sys.argv) <= 1:
         print "Usage: python test.py TRACE_PATH"
         print "The trace must be generated from getevent -lp [EVDEV]"
-        return 1
-
+        return 1 
     # TODO: now hardcoded, a mapping from a evDev to its handlers
     # for each device, we need one parser and one reporter
     myHandlers = {"/dev/input1" : (MultiTouchTypeBParser(), MultiTouchRecorder())}
     print ("timestamp", "tracking_id", "touch_major", "x", "y", "pressure")
     processRawTrace(sys.argv[1], myHandlers, "/dev/input1")
+    device.slideLeft()
+    device.slideRight()
+    print "Finishing the test"
 
 if __name__ == "__main__":
     main()
