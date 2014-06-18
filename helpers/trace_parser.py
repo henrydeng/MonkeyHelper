@@ -101,20 +101,18 @@ def processRawTrace(tracePath, myHandlers, evDev):
             print "[WARN] Unknown device: " + str(tp)
 
 def main():
+    if len(sys.argv) <= 1:
+        print "Usage: python test.py TRACE_PATH"
+        print "The trace must be generated from getevent -lp [EVDEV]"
+        return 1
     # starting the application and test
     print "Starting the monkeyrunner script"
-    # EMonkeyHelper.aapt_dump("1.apk")
     # automatically connect to the current device
     device = EMonkeyDevice()
-    #device=MonkeyRunner.waitForConnection()
     print device.getInstalledPackage()
     # the doc for the MT protocol can be found here:
     # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
     # A type A multi-touch screen
-    if len(sys.argv) <= 1:
-        print "Usage: python test.py TRACE_PATH"
-        print "The trace must be generated from getevent -lp [EVDEV]"
-        return 1 
     # TODO: now hardcoded, a mapping from a evDev to its handlers
     # for each device, we need one parser and one reporter
     myHandlers = {"/dev/input1" : (MultiTouchTypeBParser(), MultiTouchRecorder())}
