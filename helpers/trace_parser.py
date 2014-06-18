@@ -110,9 +110,6 @@ def main():
     # automatically connect to the current device
     device = EMonkeyDevice()
     print device.getInstalledPackage()
-    # the doc for the MT protocol can be found here:
-    # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
-    # A type A multi-touch screen
     # TODO: now hardcoded, a mapping from a evDev to its handlers
     # for each device, we need one parser and one reporter
     myHandlers = {"/dev/input1" : (MultiTouchTypeBParser(), MultiTouchRecorder())}
