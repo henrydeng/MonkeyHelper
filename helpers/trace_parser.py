@@ -1,6 +1,14 @@
 #!/usr/bin/python
-import sys, re
+import os, sys, re, inspect
+from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+# The EMonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
+from EMonkeyHelper import EMonkeyDevice
 
+def module_path():
+    ''' returns the module path without the use of __file__.
+    from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
+    return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+sys.path.append(module_path())
 # the doc for the MT protocol can be found here:
 # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
@@ -130,6 +138,12 @@ class FingerDecomposer:
             self.tracker[motionEvent.tracking_id] = [motionEvent]
         return PipelineParcel()
 
+class MonkeyHelperReplayer:
+    def __init(self):
+        self.device = EMonkeyDevice()
+    def next(self, whatever):
+        pass
+
 class Pipeline:
     def __init__(self):
         self.pl = []
@@ -163,6 +177,7 @@ def main():
     pl.addStep(RawTraceParser())
     pl.addStep(MultiTouchTypeBParser())
     # pl.addStep(FingerDecomposer())
+    # pl.addStep(MonkeyHelperReplayer())
     pl.addStep(GenericPrinter())
     pl.execute()
 

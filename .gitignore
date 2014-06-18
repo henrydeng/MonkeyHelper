@@ -30,3 +30,4 @@ nosetests.xml
 # Translations
 *.mo
 *$py.class
+.DS_Store
