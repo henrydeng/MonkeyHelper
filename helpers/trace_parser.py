@@ -115,8 +115,6 @@ def main():
     myHandlers = {"/dev/input1" : (MultiTouchTypeBParser(), MultiTouchRecorder())}
     print ("timestamp", "tracking_id", "touch_major", "x", "y", "pressure")
     processRawTrace(sys.argv[1], myHandlers, "/dev/input1")
-    device.slideLeft()
-    device.slideRight()
     print "Finishing the test"
 
 if __name__ == "__main__":
