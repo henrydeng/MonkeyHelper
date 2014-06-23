@@ -84,7 +84,7 @@ class MultiTouchTypeBParser:
             if geteventCmd.evCmd == "SYN_REPORT":
                 for motionEvent in self.slots:
                     if motionEvent.tracking_id != 0xFFFFFFFF:
-                        motionEvent.timestmp = geteventCmd.timestamp
+                        motionEvent.timestamp = geteventCmd.timestamp
                         parcel.enqueue(motionEvent)
             else:
                 print "[WARN] Type B MT meets unknown evCmd" + str(geteventCmd)
@@ -139,11 +139,12 @@ class FingerDecomposer:
         return PipelineParcel()
 
 class MonkeyHelperReplayer:
-    def __init(self):
+    def __init__(self):
         self.device = EMonkeyDevice()
     def next(self, whatever):
-        pass
-
+        self.device.touch(whatever.x, whatever.y)
+        return PipelineParcel()
+        
 class Pipeline:
     def __init__(self):
         self.pl = []
