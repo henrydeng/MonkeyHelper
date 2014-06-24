@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import os, sys, re, inspect
-from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+#from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 # The EMonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
-from EMonkeyHelper import EMonkeyDevice
+#from EMonkeyHelper import EMonkeyDevice
 
 def module_path():
     ''' returns the module path without the use of __file__.
@@ -40,6 +40,54 @@ class GeteventCommand:
     evVal = 0
     def __str__(self):
         return str((self.timestamp, self.evType, self.evCmd, self.evVal))
+
+# A Type A multi-touch screen
+# a list of supported features:
+
+class MultiTouchTypeAParser:
+    NAVIGATION_HEIGHT = 48
+    def __init__(self):
+        self.currentSlot = None
+        self.listMotions = []
+    def next(self, geteventCmd):
+        parcel = PipelineParcel()
+        if geteventCmd.evType == "EV_ABS":
+            if self.currentSlot is None:
+                self.currentSlot = MotionEvent()
+            if geteventCmd.evCmd == "ABS_MT_POSITION_X" or geteventCmd.evCmd == "ABS_X":
+                self.currentSlot.x = geteventCmd.evVal
+            elif geteventCmd.evCmd == "ABS_MT_POSITION_Y" or geteventCmd.evCmd == "ABS_Y":
+                self.currentSlot.y = geteventCmd.evVal
+            elif geteventCmd.evCmd == "ABS_MT_TRACKING_ID":
+                self.currentSlot.tracking_id = geteventCmd.evVal
+            elif geteventCmd.evCmd == "ABS_MT_PRESSURE":
+                self.currentSlot.pressure = geteventCmd.evVal
+            elif geteventCmd.evCmd == "ABS_MT_TOUCH_MAJOR":
+                self.currentSlot.touch_major = geteventCmd.evVal
+            else:
+                print "[WARN] Type A MT meets unknown evCmd" + str(geteventCmd)
+        elif geteventCmd.evType == "EV_KEY":
+            if geteventCmd.evCmd == "BTN_TOUCH":
+                print "[WARN] TypeA MT ignores BTN_TOUCH"
+            else:
+                print "[WARN] TYPEA MT meets unknown evCmd" + str(geteventCmd)
+        elif geteventCmd.evType == "EV_SYN":
+            if geteventCmd.evCmd == "SYN_REPORT":
+                for me in self.listMotions:
+                    me.timestamp = geteventCmd.timestamp
+                    parcel.enqueue(me)
+                self.listMotions = []
+                self.curentSlot = None
+            elif geteventCmd.evCmd == "SYN_MT_REPORT":
+                    if self.currentSlot is not None:
+                        self.listMotions.append(self.currentSlot)
+                        self.currentSlot = None
+            else:
+                print "[WARN] Type A MT meets unknown evCmd" + str(geteventCmd)
+        else:
+            print "[WARN] Type A MT skips unknown line:" + str(geteventCmd)
+        return parcel
+        
 
 # A type B multi-touch screen
 # a list of supported features:
@@ -123,7 +171,12 @@ class RawTraceParser:
         e.timestamp = float(m.group(1))
         e.evType = m.group(2)
         e.evCmd = m.group(3)
-        e.evVal = int(m.group(4), 16)
+        if m.group(4) == "DOWN":
+            e.evVal = 1 # TODO special cases for BTN_TOUCH
+        elif m.group(4) == "UP":
+            e.evVal = 0
+        else:
+            e.evVal = int(m.group(4), 16)
         parcel = PipelineParcel()
         parcel.enqueue(e)
         return parcel
@@ -176,7 +229,7 @@ def main():
     pl = Pipeline()
     pl.addStep(TextFileLineReader(sys.argv[1]))
     pl.addStep(RawTraceParser())
-    pl.addStep(MultiTouchTypeBParser())
+    pl.addStep(MultiTouchTypeAParser())
     # pl.addStep(FingerDecomposer())
     # pl.addStep(MonkeyHelperReplayer())
     pl.addStep(GenericPrinter())
