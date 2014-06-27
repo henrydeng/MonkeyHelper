@@ -32,6 +32,8 @@ class MotionEvent:
     pressure = 0
     def __str__(self):
         return str((self.timestamp, self.tracking_id, self.touch_major, self.x, self.y, self.pressure))
+    def __repr__(self):
+        return self.__str__()
 
 class GeteventCommand:
     timestamp = 0
@@ -73,13 +75,12 @@ class MultiTouchTypeAParser:
                 print "[WARN] TYPEA MT meets unknown evCmd" + str(geteventCmd)
         elif geteventCmd.evType == "EV_SYN":
             if geteventCmd.evCmd == "SYN_REPORT":
-                for me in self.listMotions:
-                    me.timestamp = geteventCmd.timestamp
-                    parcel.enqueue(me)
+                parcel.enqueue(self.listMotions)
                 self.listMotions = []
                 self.curentSlot = None
             elif geteventCmd.evCmd == "SYN_MT_REPORT":
                     if self.currentSlot is not None:
+                        self.currentSlot.timestamp = geteventCmd.timestamp
                         self.listMotions.append(self.currentSlot)
                         self.currentSlot = None
             else:
