@@ -195,8 +195,34 @@ class FingerDecomposer:
 class MonkeyHelperReplayer:
     def __init__(self):
         self.device = EMonkeyDevice()
+        self.xValues=[]
+        self.yValues=[]
+        self.times=[]
+        self.lastTimeStamp=0
     def next(self, whatever):
-        self.device.touch(whatever.x, whatever.y)
+        if not whatever:    #if it is empty
+            if len(self.xValues)==1:
+                # missing sleep duration for single touch
+                # self.device.sleep(self.times[0]-self.lastTimeStamp)
+                self.device.touch(self.xValues[0], self.yValues[0])
+                self.lastTimeStamp=self.times[0]
+            else:
+                for count in range (len(self.xValues)):
+                    if (count==0):
+                        self.device.touch(self.xValues[0], self.yValues[0], MonkeyDevice.DOWN)
+                        continue
+                    self.device.sleep(self.times[count]-self.times[count-1])
+                    self.device.touch(self.xValues[count], self.yValues[count], MonkeyDevice.MOVE)
+                self.device.touch(self.xValues[len(self.xValues)-1], self.yValues[len(self.yValues)-1], MonkeyDevice.UP)
+                self.lastTimeStamp=self.times[len(self.times)-1]
+            self.xValues=[]
+            self.yValues=[]
+            self.times=[]
+        else:
+            next=whatever.pop(0)      
+            self.times.append(next.timestamp)
+            self.xValues.append(next.x)
+            self.yValues.append(next.y)
         return PipelineParcel()
         
 class Pipeline:
