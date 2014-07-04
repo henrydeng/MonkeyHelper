@@ -199,14 +199,20 @@ class MonkeyHelperReplayer:
         self.yValues=[]
         self.times=[]
         self.lastTimeStamp=0
+        self.first=True
     def next(self, whatever):
-        if not whatever:    #if it is empty
+        if len(whatever)==0:    #if it is empty
             if len(self.xValues)==1:
-                # missing sleep duration for single touch
-                # self.device.sleep(self.times[0]-self.lastTimeStamp)
+                if (self.first):
+                    self.lastTimeStamp=self.times[0]
+                    self.first=False
+                else:
+                    self.device.sleep(self.times[0]-self.lastTimeStamp)
                 self.device.touch(self.xValues[0], self.yValues[0])
+                print self.xValues[0], self.yValues[0]
                 self.lastTimeStamp=self.times[0]
             else:
+                self.first=False
                 for count in range (len(self.xValues)):
                     if (count==0):
                         self.device.touch(self.xValues[0], self.yValues[0], MonkeyDevice.DOWN)
@@ -219,10 +225,14 @@ class MonkeyHelperReplayer:
             self.yValues=[]
             self.times=[]
         else:
-            next=whatever.pop(0)      
+            next=whatever.pop(0)
+            tempXValue=float(next.x)
+            tempYValue=float(next.y)
+            tempXValue=int(((tempXValue/1597)*1280)+0.5)
+            tempYValue=int(((tempYValue/999)*800)+0.5)
             self.times.append(next.timestamp)
-            self.xValues.append(next.x)
-            self.yValues.append(next.y)
+            self.xValues.append(tempXValue)
+            self.yValues.append(tempYValue)
         return PipelineParcel()
         
 class Pipeline:
