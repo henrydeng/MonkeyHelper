@@ -193,36 +193,45 @@ class FingerDecomposer:
         return PipelineParcel()
 
 class MonkeyHelperReplayer:
+    def __init__(self): 
+        self.device = EMonkeyDevice()
+        self.xValues=[]
+        self.yValues=[]
+        self.times=[]
+        self.lastTimeStamp=0
+        self.first=True
     def next(self, whatever):
         if len(whatever)==0:    #if it is empty
             if len(self.xValues)==1:    #if it's a touch
-                if (self.first):        #if it's the first touch there is no sleep
+                if (self.first):        #if it's the first action, there is not sleep
                     self.lastTimeStamp=self.times[0]
                     self.first=False
-                else:                   #any other touch
+                else:                   # any other touch
                     self.device.sleep(self.times[0]-self.lastTimeStamp)
                 self.device.touch(self.xValues[0], self.yValues[0])
                 print self.xValues[0], self.yValues[0]
                 self.lastTimeStamp=self.times[0]
-            else:                       # if it's a drag
-                self.first=False
+            else:                       #if it's a drag
                 for count in range (len(self.xValues)):
-                    if (count==0):      # first element of the drag sequence 
+                    if (count==0):      #first element of the drag sequence
+                        if (self.first==False): #if it's not the first action
+                            self.device.sleep(self.times[0]-self.lastTimeStamp)
                         self.device.touch(self.xValues[0], self.yValues[0], MonkeyDevice.DOWN)
+                        self.first=False
                         continue
                     self.device.sleep(self.times[count]-self.times[count-1])
                     self.device.touch(self.xValues[count], self.yValues[count], MonkeyDevice.MOVE)
                 self.device.touch(self.xValues[len(self.xValues)-1], self.yValues[len(self.yValues)-1], MonkeyDevice.UP)
                 self.lastTimeStamp=self.times[len(self.times)-1]
-            self.xValues=[]             # after a drag of a touch, we reset the arrays
+            self.xValues=[]                 #after a drag, we reset all the arrays
             self.yValues=[]
             self.times=[]
-        else:                           #if it's not empty, we store all the variables into their respective arrays
+        else:                               #if the length of whatever is not empty, we store all the variables into their respective arrays
             next=whatever.pop(0)
             tempXValue=float(next.x)
             tempYValue=float(next.y)
-            tempXValue=int(((tempXValue/1600)*1280)+0.5)
-            tempYValue=int(((tempYValue/1000)*800)+0.5)
+            tempXValue=int((tempXValue*0.8)+0.5)
+            tempYValue=int((tempYValue*0.8)+0.5)
             self.times.append(next.timestamp)
             self.xValues.append(tempXValue)
             self.yValues.append(tempYValue)
