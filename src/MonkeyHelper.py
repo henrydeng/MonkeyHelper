@@ -45,6 +45,7 @@ class EMonkeyDevice:
 	DOWN_AND_UP = MonkeyDevice.DOWN_AND_UP
 	DOWN = MonkeyDevice.DOWN
 	UP = MonkeyDevice.UP
+	MOVE = MonkeyDevice.MOVE
 	def __init__(self):
 		self.dev = MonkeyRunner.waitForConnection()
 		self.displayWidth = int(self.getProperty("display.width"))

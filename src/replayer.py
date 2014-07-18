@@ -1,14 +1,15 @@
 #!/usr/bin/python
+'use strict'
 import os, sys, re, inspect
-#from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
-# The EMonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
-#from EMonkeyHelper import EMonkeyDevice
-
 def module_path():
     ''' returns the module path without the use of __file__.
     from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
     return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
 sys.path.append(module_path())
+
+# The MonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
+from MonkeyHelper import EMonkeyDevice
+
 # the doc for the MT protocol can be found here:
 # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
@@ -51,6 +52,7 @@ class MultiTouchTypeAParser:
     def __init__(self):
         self.currentSlot = None
         self.listMotions = []
+        self.dontReport = False # one-shot disabler
     def next(self, geteventCmd):
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
@@ -61,11 +63,16 @@ class MultiTouchTypeAParser:
             elif geteventCmd.evCmd == "ABS_MT_POSITION_Y" or geteventCmd.evCmd == "ABS_Y":
                 self.currentSlot.y = geteventCmd.evVal
             elif geteventCmd.evCmd == "ABS_MT_TRACKING_ID":
-                self.currentSlot.tracking_id = geteventCmd.evVal
+                if geteventCmd.evVal == 0xFFFFFFFF:
+                    self.currentSlot = None
+                else:
+                    self.currentSlot.tracking_id = geteventCmd.evVal
             elif geteventCmd.evCmd == "ABS_MT_PRESSURE":
                 self.currentSlot.pressure = geteventCmd.evVal
             elif geteventCmd.evCmd == "ABS_MT_TOUCH_MAJOR":
                 self.currentSlot.touch_major = geteventCmd.evVal
+            elif geteventCmd.evCmd == "ABS_MISC":
+                self.dontReport = True
             else:
                 print "[WARN] Type A MT meets unknown evCmd" + str(geteventCmd)
         elif geteventCmd.evType == "EV_KEY":
@@ -74,15 +81,19 @@ class MultiTouchTypeAParser:
             else:
                 print "[WARN] TYPEA MT meets unknown evCmd" + str(geteventCmd)
         elif geteventCmd.evType == "EV_SYN":
+            if self.currentSlot is not None:
+                self.currentSlot.timestamp = geteventCmd.timestamp
+                self.listMotions.append(self.currentSlot)
+                self.currentSlot = None
             if geteventCmd.evCmd == "SYN_REPORT":
-                parcel.enqueue(self.listMotions)
+                if self.dontReport:
+                    self.dontReport = False
+                else:
+                    parcel.enqueue(self.listMotions)
                 self.listMotions = []
                 self.curentSlot = None
             elif geteventCmd.evCmd == "SYN_MT_REPORT":
-                    if self.currentSlot is not None:
-                        self.currentSlot.timestamp = geteventCmd.timestamp
-                        self.listMotions.append(self.currentSlot)
-                        self.currentSlot = None
+                pass
             else:
                 print "[WARN] Type A MT meets unknown evCmd" + str(geteventCmd)
         else:
@@ -169,6 +180,9 @@ class RawTraceParser:
     def next(self, line):
         m = self.pattern.match(line)
         e = GeteventCommand()
+        if m is None:
+            print "[ERROR] unidentified raw trace line:" + line
+            sys.exit()
         e.timestamp = float(m.group(1))
         e.evType = m.group(2)
         e.evCmd = m.group(3)
@@ -195,46 +209,48 @@ class FingerDecomposer:
 class MonkeyHelperReplayer:
     def __init__(self): 
         self.device = EMonkeyDevice()
-        self.xValues=[]
-        self.yValues=[]
-        self.times=[]
+        self.things = []
         self.lastTimeStamp=0
         self.first=True
+        self.SCREEN_SCALING = 1 # 0.8 for tablet
     def next(self, whatever):
+        print whatever
         if len(whatever)==0:    #if it is empty
-            if len(self.xValues)==1:    #if it's a touch
-                if (self.first):        #if it's the first action, there is not sleep
-                    self.lastTimeStamp=self.times[0]
-                    self.first=False
-                else:                   # any other touch
-                    self.device.sleep(self.times[0]-self.lastTimeStamp)
-                self.device.touch(self.xValues[0], self.yValues[0])
-                print self.xValues[0], self.yValues[0]
-                self.lastTimeStamp=self.times[0]
+            if self.first:
+                self.lastTimeStamp = self.things[0].timestamp
+                self.first = False
+            if len(self.things) == 1:    #if it's a touch
+                self.device.sleep(self.things[0].timestamp-self.lastTimeStamp)
+                self.device.touch(self.things[0].x, self.things[0].y)
+                self.lastTimeStamp = self.things[0].timestamp
+                self.things=[]
             else:                       #if it's a drag
-                for count in range (len(self.xValues)):
-                    if (count==0):      #first element of the drag sequence
-                        if (self.first==False): #if it's not the first action
-                            self.device.sleep(self.times[0]-self.lastTimeStamp)
-                        self.device.touch(self.xValues[0], self.yValues[0], MonkeyDevice.DOWN)
-                        self.first=False
-                        continue
-                    self.device.sleep(self.times[count]-self.times[count-1])
-                    self.device.touch(self.xValues[count], self.yValues[count], MonkeyDevice.MOVE)
-                self.device.touch(self.xValues[len(self.xValues)-1], self.yValues[len(self.yValues)-1], MonkeyDevice.UP)
-                self.lastTimeStamp=self.times[len(self.times)-1]
-            self.xValues=[]                 #after a drag, we reset all the arrays
-            self.yValues=[]
-            self.times=[]
+                lastTimeStamp = self.lastTimeStamp
+                for count in range(len(self.things)):
+                    if count == 0:      #first element of the drag sequence
+                        self.device.sleep(self.things[count].timestamp - lastTimeStamp)
+                        self.first = False
+                        action = EMonkeyDevice.DOWN
+                    elif count == len(self.things) - 1: # last one
+                        action = EMonkeyDevice.UP
+                    else:
+                        action = EMonkeyDevice.MOVE
+                    self.device.sleep(self.things[count].timestamp - lastTimeStamp)
+                    self.device.touch(self.things[count].x, self.things[count].y, action)
+                    lastTimeStamp = self.things[count].timestamp
+                self.lastTimeStamp = lastTimeStamp
+            self.things=[]                 #after a drag, we reset all the arrays
         else:                               #if the length of whatever is not empty, we store all the variables into their respective arrays
-            next=whatever.pop(0)
-            tempXValue=float(next.x)
-            tempYValue=float(next.y)
-            tempXValue=int((tempXValue*0.8)+0.5)
-            tempYValue=int((tempYValue*0.8)+0.5)
-            self.times.append(next.timestamp)
-            self.xValues.append(tempXValue)
-            self.yValues.append(tempYValue)
+            # TODO: assume single finger
+            motionEvent = whatever.pop(0)
+            # TODO: scaling, might not be necessary later on
+            tempXValue = float(motionEvent.x)
+            tempYValue = float(motionEvent.y)
+            tempXValue = int((tempXValue * self.SCREEN_SCALING)+0.5)
+            tempYValue = int((tempYValue * self.SCREEN_SCALING)+0.5)
+            motionEvent.x = tempXValue
+            motionEvent.y = tempYValue
+            self.things.append(motionEvent)
         return PipelineParcel()
         
 class Pipeline:
@@ -270,8 +286,8 @@ def main():
     pl.addStep(RawTraceParser())
     pl.addStep(MultiTouchTypeAParser())
     # pl.addStep(FingerDecomposer())
-    # pl.addStep(MonkeyHelperReplayer())
-    pl.addStep(GenericPrinter())
+    pl.addStep(MonkeyHelperReplayer())
+    # pl.addStep(GenericPrinter())
     pl.execute()
 
 if __name__ == "__main__":
