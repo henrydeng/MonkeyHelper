@@ -35,6 +35,15 @@ class MotionEvent:
         return str((self.timestamp, self.tracking_id, self.touch_major, self.x, self.y, self.pressure))
     def __repr__(self):
         return self.__str__()
+    def clone(self):
+        s = MotionEvent()
+        s.timestamp = self.timestamp
+        s.tracking_id = self.tracking_id
+        s.touch_major = self.touch_major
+        s.x = self.x
+        s.y = self.y
+        s.pressure = self.pressure
+        return s
 
 class GeteventCommand:
     timestamp = 0
@@ -50,14 +59,12 @@ class GeteventCommand:
 class MultiTouchTypeAParser:
     NAVIGATION_HEIGHT = 48
     def __init__(self):
-        self.currentSlot = None
+        self.currentSlot = MotionEvent()
         self.listMotions = []
         self.dontReport = False # one-shot disabler
     def next(self, geteventCmd):
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
-            if self.currentSlot is None:
-                self.currentSlot = MotionEvent()
             if geteventCmd.evCmd == "ABS_MT_POSITION_X" or geteventCmd.evCmd == "ABS_X":
                 self.currentSlot.x = geteventCmd.evVal
             elif geteventCmd.evCmd == "ABS_MT_POSITION_Y" or geteventCmd.evCmd == "ABS_Y":
@@ -84,14 +91,15 @@ class MultiTouchTypeAParser:
             if self.currentSlot is not None:
                 self.currentSlot.timestamp = geteventCmd.timestamp
                 self.listMotions.append(self.currentSlot)
-                self.currentSlot = None
+            else:
+                self.currentSlot = MotionEvent()
             if geteventCmd.evCmd == "SYN_REPORT":
                 if self.dontReport:
                     self.dontReport = False
                 else:
                     parcel.enqueue(self.listMotions)
                 self.listMotions = []
-                self.curentSlot = None
+                self.currentSlot = self.currentSlot.clone()
             elif geteventCmd.evCmd == "SYN_MT_REPORT":
                 pass
             else:
