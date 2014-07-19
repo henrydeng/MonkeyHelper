@@ -19,7 +19,6 @@
 #   Ran Shu
 #
 
-'use strict'
 import os, sys, re, inspect
 def module_path():
     ''' returns the module path without the use of __file__.
@@ -237,48 +236,42 @@ class FingerDecomposer:
 class MonkeyHelperReplayer:
     def __init__(self): 
         self.device = EMonkeyDevice()
-        self.things = []
-        self.lastTimeStamp=0
-        self.first=True
+        self.trail = []
+        self.lastTimeStamp = None
         self.SCREEN_SCALING = 1 # 0.8 for tablet
-    def next(self, whatever):
-        print whatever
-        if len(whatever)==0:    #if it is empty
-            if self.first:
-                self.lastTimeStamp = self.things[0].timestamp
-                self.first = False
-            if len(self.things) == 1:    #if it's a touch
-                self.device.sleep(self.things[0].timestamp-self.lastTimeStamp)
-                self.device.touch(self.things[0].x, self.things[0].y)
-                self.lastTimeStamp = self.things[0].timestamp
-                self.things=[]
-            else:                       #if it's a drag
-                lastTimeStamp = self.lastTimeStamp
-                for count in range(len(self.things)):
-                    if count == 0:      #first element of the drag sequence
-                        self.device.sleep(self.things[count].timestamp - lastTimeStamp)
-                        self.first = False
-                        action = EMonkeyDevice.DOWN
-                    elif count == len(self.things) - 1: # last one
-                        action = EMonkeyDevice.UP
-                    else:
-                        action = EMonkeyDevice.MOVE
-                    self.device.sleep(self.things[count].timestamp - lastTimeStamp)
-                    self.device.touch(self.things[count].x, self.things[count].y, action)
-                    lastTimeStamp = self.things[count].timestamp
-                self.lastTimeStamp = lastTimeStamp
-            self.things=[]                 #after a drag, we reset all the arrays
-        else:                               #if the length of whatever is not empty, we store all the variables into their respective arrays
+    def scaleXY(self, motionEvent, factor):
+        tempXValue = float(motionEvent.x)
+        tempYValue = float(motionEvent.y)
+        tempXValue = int((tempXValue * self.SCREEN_SCALING)+0.5)
+        tempYValue = int((tempYValue * self.SCREEN_SCALING)+0.5)
+        motionEvent.x = tempXValue
+        motionEvent.y = tempYValue
+    def perform(self, trail):
+        lastTimeStamp = self.lastTimeStamp
+        if len(trail) <= 0:
+            print "[WARN] perform an empty trail"
+        elif len(trail) == 1:
+            actions = [EMonkeyDevice.DOWN_AND_UP]
+        else:
+            actions = [EMonkeyDevice.DOWN] + [EMonkeyDevice.MOVE] * (len(trail) - 2) + [EMonkeyDevice.UP]
+        for count in range(len(trail)):
+            self.device.sleep(trail[count].timestamp - lastTimeStamp)
+            self.device.touch(trail[count].x, trail[count].y, actions[count])
+            lastTimeStamp = trail[count].timestamp
+        self.lastTimeStamp = lastTimeStamp
+    def next(self, listMotionEvents):
+        print listMotionEvents
+        if len(listMotionEvents) == 0:    # this is an ending mark
+            if self.lastTimeStamp is None: # in case this is the beginning of the entire trace
+                self.lastTimeStamp = self.trail[0].timestamp
+            self.perform(self.trail)
+            self.trail = []                 # clear the trail
+        else:                               # indicate a point in the trail
             # TODO: assume single finger
-            motionEvent = whatever.pop(0)
+            motionEvent = listMotionEvents.pop(0)
             # TODO: scaling, might not be necessary later on
-            tempXValue = float(motionEvent.x)
-            tempYValue = float(motionEvent.y)
-            tempXValue = int((tempXValue * self.SCREEN_SCALING)+0.5)
-            tempYValue = int((tempYValue * self.SCREEN_SCALING)+0.5)
-            motionEvent.x = tempXValue
-            motionEvent.y = tempYValue
-            self.things.append(motionEvent)
+            self.scaleXY(motionEvent, self.SCREEN_SCALING)
+            self.trail.append(motionEvent)
         return PipelineParcel()
         
 class Pipeline:
