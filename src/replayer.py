@@ -223,20 +223,30 @@ class RawTraceParser:
         parcel.enqueue(e)
         return parcel
 
+# decompose the TypeA/TypeB motionEvent stream into finger trails
 class FingerDecomposer:
     def __init__(self):
         self.tracker = {}
-    def next(self, motionEvent):
-        if motionEvent.tracking_id in self.tracker:
-            self.tracker[motionEvent.tracking_id].append(motionEvent)
-        else:
-            self.tracker[motionEvent.tracking_id] = [motionEvent]
-        return PipelineParcel()
+    def next(self, listMotionEvents):
+        prev = self.tracker
+        alive = {}
+        parcel = PipelineParcel()
+        for e in listMotionEvents:
+            if e.tracking_id in prev:
+                t = prev[e.tracking_id]
+                t.append(e)
+                del prev[e.tracking_id]
+                alive[e.tracking_id] = t
+            else:
+                alive[e.tracking_id] = [e]
+        self.tracker = alive
+        for trail in prev.values():
+            parcel.enqueue(trail)
+        return parcel
 
 class MonkeyHelperReplayer:
     def __init__(self): 
         self.device = EMonkeyDevice()
-        self.trail = []
         self.lastTimeStamp = None
         self.SCREEN_SCALING = 1 # 0.8 for tablet
     def scaleXY(self, motionEvent, factor):
@@ -246,7 +256,9 @@ class MonkeyHelperReplayer:
         tempYValue = int((tempYValue * self.SCREEN_SCALING)+0.5)
         motionEvent.x = tempXValue
         motionEvent.y = tempYValue
-    def perform(self, trail):
+    def next(self, trail):
+        if self.lastTimeStamp is None: # in case this is the beginning of the entire trace
+            self.lastTimeStamp = trail[0].timestamp
         lastTimeStamp = self.lastTimeStamp
         if len(trail) <= 0:
             print "[WARN] perform an empty trail"
@@ -259,19 +271,6 @@ class MonkeyHelperReplayer:
             self.device.touch(trail[count].x, trail[count].y, actions[count])
             lastTimeStamp = trail[count].timestamp
         self.lastTimeStamp = lastTimeStamp
-    def next(self, listMotionEvents):
-        print listMotionEvents
-        if len(listMotionEvents) == 0:    # this is an ending mark
-            if self.lastTimeStamp is None: # in case this is the beginning of the entire trace
-                self.lastTimeStamp = self.trail[0].timestamp
-            self.perform(self.trail)
-            self.trail = []                 # clear the trail
-        else:                               # indicate a point in the trail
-            # TODO: assume single finger
-            motionEvent = listMotionEvents.pop(0)
-            # TODO: scaling, might not be necessary later on
-            self.scaleXY(motionEvent, self.SCREEN_SCALING)
-            self.trail.append(motionEvent)
         return PipelineParcel()
         
 class Pipeline:
@@ -301,12 +300,11 @@ def main():
         print "Usage: python test.py TRACE_PATH"
         print "The trace must be generated from getevent -lt [EVDEV]"
         return 1
-    print ("timestamp", "tracking_id", "touch_major", "x", "y", "pressure")
     pl = Pipeline()
     pl.addStep(TextFileLineReader(sys.argv[1]))
     pl.addStep(RawTraceParser())
     pl.addStep(MultiTouchTypeAParser())
-    # pl.addStep(FingerDecomposer())
+    pl.addStep(FingerDecomposer())
     pl.addStep(MonkeyHelperReplayer())
     # pl.addStep(GenericPrinter())
     pl.execute()
