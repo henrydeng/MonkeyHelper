@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # Copyright 2014 Mingyuan Xia (http://mxia.me) and others
 #
@@ -19,12 +18,16 @@
 #   Ran Shu
 #
 
-import subprocess
-import os
+""" MonkeyHelper enriches the monkeyrunner interfaces to easily manipulate 
+an android box. You need monkeyrunner to run scripts once including this module
+"""
+
+import os, subprocess
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 
-# helper: execute a raw command and selectively mute stdout and stderr
 def _cmd(cmdlist, mute=1):
+	""" A helper function to execute a shell command and selectively mute stdout and stderr
+	"""
 	if mute:
 		fnull = open(os.devnull, "w")
 		proc = subprocess.Popen(cmdlist, stdout = fnull, stderr = fnull)
@@ -38,14 +41,16 @@ def _cmd(cmdlist, mute=1):
 		return (proc.returncode, erroutput + output)
 	
 class MonkeyHelper:
-	# call the aapt tool with arbitrary commands
 	@staticmethod
 	def aapt(cmdlist, mute = True):
+		""" Call the aapt tool with arbitrary commands
+		"""
 		return _cmd(["aapt"] + cmdlist, mute)
 	
-	# retrieve the package name and main activity name of an apk
 	@staticmethod
 	def aapt_dump(apk):
+		""" Retrieve the package name and main activity name of an apk
+		"""
 		(ret, output) = MonkeyHelper.aapt(['dump','badging',apk], False)
 		assert ret == 0, "Failed to retrieve the info of " + apk
 		pkg = mainact = None
@@ -61,8 +66,9 @@ class MonkeyHelper:
 		assert pkg is not None, 'Abnormal pkg:'+apk+'\n'+output
 		return (pkg, mainact)
 
-# enhanced MonkeyDevice
 class EMonkeyDevice:
+	""" An enriched MonkeyDevice
+	"""
 	DOWN_AND_UP = MonkeyDevice.DOWN_AND_UP
 	DOWN = MonkeyDevice.DOWN
 	UP = MonkeyDevice.UP
@@ -71,9 +77,6 @@ class EMonkeyDevice:
 		self.dev = MonkeyRunner.waitForConnection()
 		self.displayWidth = int(self.getProperty("display.width"))
 		self.displayHeight = int(self.getProperty("display.height"))
-		print "Device attached"
-		print "displayWidth = ", self.displayWidth
-		print "displayHeight = ", self.displayHeight
 	def broadcastIntent(self, uri, action, data, mimetype, extras, component, flags):
 		self.dev.broadcastIntent(uri, action, data, mimetype, extras, component, flags)
 	def drag(self, start, end, duration, steps):
@@ -137,17 +140,14 @@ class EMonkeyDevice:
 		l = []
 		for line in raw.split('\n'):
 			if line.startswith("package:"):
-				l.append(line[8:].rstrip())
+				l.append(line.replace("package:", "").rstrip())
 		return l
 	def killAllBgApps(self):
 		self.shell("am kill-all")
 	def pushFile(self, path):
-		#return self.shell("push " + path)
-		pass
+		return self.shell("push " + path)
 	def pullFile(self, devicePath, localPath):
-		# return self.shell("pull %s %s" % (devicePath, localPath))
-		pass
+		return self.shell("pull %s %s" % (devicePath, localPath))
 	def getSystemInfo(self):
-		d = {"android_version": self.getProperty("build.version.release")}
-		return d
+		return {"android_version": self.getProperty("build.version.release")}
 	

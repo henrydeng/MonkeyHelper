@@ -16,8 +16,10 @@
 # 
 # Contributors:
 #   Mingyuan Xia
-#   Ran Shu
 #
+
+""" This script demonstrates the use of MonkeyHelper APIs
+"""
 
 import os, sys, inspect
 def module_path():
@@ -30,15 +32,14 @@ sys.path.append(module_path())
 from MonkeyHelper import EMonkeyDevice 
 
 # starting the application and test
-print "Starting the monkeyrunner script"
-
-# MonkeyHelper.aapt_dump("1.apk")
+print "Starting the demo"
 
 # automatically connect to the current device
 device = EMonkeyDevice()
+print "Installed packages"
 print device.getInstalledPackage()
 device.wake().sleep(1).unlockScreen().sleep(1)
 device.slideRight().sleep(2).slideLeft().sleep(1)
 device.press('KEYCODE_MENU').sleep(1).touch(95, 400).sleep(1)
 
-print "Finishing the test"
+print "Finishing the demo"

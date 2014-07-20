@@ -31,3 +31,6 @@ nosetests.xml
 *.mo
 *$py.class
 .DS_Store
+
+# Misc
+.launch
