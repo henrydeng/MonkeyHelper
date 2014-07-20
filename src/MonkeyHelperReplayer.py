@@ -29,12 +29,10 @@ class MonkeyHelperReplayer:
     """
     def __init__(self): 
         self.device = EMonkeyDevice()
-        self.lastTimeStamp = None
+        self.lastTimeStamp = 0
     def next(self, trail):
         """ Takes a finger trail and produces nothing
         """
-        if self.lastTimeStamp is None: # in case this is the beginning of the entire trace
-            self.lastTimeStamp = trail[0].timestamp
         lastTimeStamp = self.lastTimeStamp
         if len(trail) <= 0:
             print "[WARN] perform an empty trail"

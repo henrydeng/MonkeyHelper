@@ -272,18 +272,28 @@ class TrailScaler:
         return parcel
 
 class TimeScaler:
-    """ Scale the time of a trail
+    """ Scale the time of a trail, e.g. accelerate/decelerate the replaying
     """
     def __init__(self, factor):
         self.factor = factor
-        self.baseTimestamp = None
     def next(self, trail):
         """ Takes a trail and produces a time-scaled trail
         """
-        if self.baseTimestamp is None:
-            self.baseTimestamp = trail[0].timestamp
         for e in trail:
-            e.timestamp = self.baseTimestamp + (e.timestamp - self.baseTimestamp) * self.factor
+            e.timestamp *= self.factor
         parcel = PipelineParcel()
         parcel.enqueue(trail)
+        return parcel
+    
+class RelativeTimingConverter:
+    """
+    """
+    baseTimestamp = None
+    def next(self, listMotionEvents):
+        if self.baseTimestamp is None:
+            self.baseTimestamp = listMotionEvents[0].timestamp
+        for e in listMotionEvents:
+            e.timestamp = e.timestamp - self.baseTimestamp
+        parcel = PipelineParcel()
+        parcel.enqueue(listMotionEvents)
         return parcel

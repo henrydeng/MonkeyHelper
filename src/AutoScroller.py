@@ -30,7 +30,7 @@ def module_path():
 sys.path.append(module_path())
 
 from Pipeline import Pipeline
-import DroidTraceManipulation as dtm
+import TraceManipulation as dtm
 from MonkeyHelperReplayer import MonkeyHelperReplayer
 from MonkeyHelper import MonkeyHelper, EMonkeyDevice, _cmd
 import subprocess

@@ -30,7 +30,7 @@ def module_path():
 sys.path.append(module_path())
 
 from Pipeline import Pipeline
-import DroidTraceManipulation as dtm
+import TraceManipulation as dtm
 from MonkeyHelperReplayer import MonkeyHelperReplayer
 
 def main():
@@ -43,10 +43,11 @@ def main():
     pl.addStep(dtm.TextFileLineReader(sys.argv[1]))
     pl.addStep(dtm.RawTraceParser())
     pl.addStep(dtm.MultiTouchTypeAParser())
+    pl.addStep(dtm.RelativeTimingConverter())
     pl.addStep(dtm.FingerDecomposer())
     # this step might be necessary for a tablet
     # pl.addStep(TrailScaler(0.8))
-    pl.addStep(dtm.TimeScaler(0.5))
+    # pl.addStep(dtm.TimeScaler(0.25))
     pl.addStep(MonkeyHelperReplayer())
     # pl.addStep(GenericPrinter())
     pl.execute()
