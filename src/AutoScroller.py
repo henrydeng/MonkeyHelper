@@ -18,8 +18,8 @@
 #
 
 """
-This script demonstrates how to replay a trace to a Android device. You need
-monkeyrunner to run scripts once including this module
+This script capture several live scrolling gesture and learn user's scrolling
+speed. Then it produces further scrolling at user's pace.
 """
 
 import os, sys, inspect
@@ -32,25 +32,18 @@ sys.path.append(module_path())
 from Pipeline import Pipeline
 import DroidTraceManipulation as dtm
 from MonkeyHelperReplayer import MonkeyHelperReplayer
+from MonkeyHelper import MonkeyHelper, EMonkeyDevice, _cmd
+import subprocess
 
 def main():
-    if len(sys.argv) <= 1:
-        print "Usage: monkeyrunner DroidReplayer.py TRACE_PATH"
-        print "The trace must be generated from getevent -lt [EVDEV]"
-        return 1
-    print "Replay started"
-    pl = Pipeline()
-    pl.addStep(dtm.TextFileLineReader(sys.argv[1]))
-    pl.addStep(dtm.RawTraceParser())
-    pl.addStep(dtm.MultiTouchTypeAParser())
-    pl.addStep(dtm.FingerDecomposer())
-    # this step might be necessary for a tablet
-    # pl.addStep(TrailScaler(0.8))
-    pl.addStep(dtm.TimeScaler(0.5))
-    pl.addStep(MonkeyHelperReplayer())
-    # pl.addStep(GenericPrinter())
-    pl.execute()
-    print "Replay finished"
+    print "learning the pace of scrolling"
+    device = EMonkeyDevice()
+    # cmd = ["adb", "shell", "getevent", "-lt"]
+    cmd = ["adb", "shell", "logcat"]
+    p = subprocess.Popen(cmd, stdout = subprocess.PIPE, 
+                stderr = subprocess.PIPE)
+    for line in p.stdout:
+        print line
         
 if __name__ == "__main__":
     main()

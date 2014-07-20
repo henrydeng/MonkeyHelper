@@ -252,21 +252,38 @@ class TrailScaler:
     """ Scale the coordinates of the motion events in the trail
     Used to adapt the trail from one device to another with a different resolution
     """
-    def __init(self, factor):
-        self.factor = factor
-    @staticmethod
-    def scaleXY( motionEvent, factor):
+    def __init__(self, xfactor, yfactor):
+        self.xfactor = xfactor
+        self.yfactor = yfactor
+    def scaleXY(self, motionEvent):
         tempXValue = float(motionEvent.x)
         tempYValue = float(motionEvent.y)
-        tempXValue = int((tempXValue * factor)+0.5)
-        tempYValue = int((tempYValue * factor)+0.5)
+        tempXValue = int((tempXValue * self.xfactor)+0.5)
+        tempYValue = int((tempYValue * self.yfactor)+0.5)
         motionEvent.x = tempXValue
         motionEvent.y = tempYValue
     def next(self, trail):
-        """ Takes a trail and produces a scaled trail with given factor
+        """ Takes a trail and produces a scaled trail with given factors
         """
         for e in trail:
-            self.scaleXY(e, self.factor)
+            self.scaleXY(e)
+        parcel = PipelineParcel()
+        parcel.enqueue(trail)
+        return parcel
+
+class TimeScaler:
+    """ Scale the time of a trail
+    """
+    def __init__(self, factor):
+        self.factor = factor
+        self.baseTimestamp = None
+    def next(self, trail):
+        """ Takes a trail and produces a time-scaled trail
+        """
+        if self.baseTimestamp is None:
+            self.baseTimestamp = trail[0].timestamp
+        for e in trail:
+            e.timestamp = self.baseTimestamp + (e.timestamp - self.baseTimestamp) * self.factor
         parcel = PipelineParcel()
         parcel.enqueue(trail)
         return parcel

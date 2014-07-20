@@ -25,7 +25,7 @@ an android box. You need monkeyrunner to run scripts once including this module
 import os, subprocess
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 
-def _cmd(cmdlist, mute=1):
+def _cmd(cmdlist, mute=True):
 	""" A helper function to execute a shell command and selectively mute stdout and stderr
 	"""
 	if mute:
@@ -46,7 +46,6 @@ class MonkeyHelper:
 		""" Call the aapt tool with arbitrary commands
 		"""
 		return _cmd(["aapt"] + cmdlist, mute)
-	
 	@staticmethod
 	def aapt_dump(apk):
 		""" Retrieve the package name and main activity name of an apk
