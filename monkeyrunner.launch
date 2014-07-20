@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<launchConfiguration type="org.eclipse.ui.externaltools.ProgramLaunchConfigurationType">
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LAUNCH_CONFIGURATION_BUILD_SCOPE" value="${project}"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="/Applications/android-sdk-macosx/tools/monkeyrunner"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="${project_loc:/MonkeyHelper}/src/replayer.py /Users/apple/Downloads/galaxys-paint.txt"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/MonkeyHelper/src}"/>
-</launchConfiguration>
