@@ -11,6 +11,8 @@ We highlight some use cases that could be useful for different purposes.
 
 # Show cases
 * Replaying AngryBirds on a Tablet
+
 [![Replay AngryBirds](http://img.youtube.com/vi/vYlO0UrhRR8/0.jpg)](http://www.youtube.com/watch?v=vYlO0UrhRR8)
 * Replaying a paint on a Samsung Galaxy S
+* 
 [![Replay Painting](http://img.youtube.com/vi/4j8VpAO4XCg/0.jpg)](http://www.youtube.com/watch?v=4j8VpAO4XCg)
