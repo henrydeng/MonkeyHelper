@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # Copyright 2014 Mingyuan Xia (http://mxia.me) and others
 #
@@ -16,34 +15,19 @@
 # 
 # Contributors:
 #   Mingyuan Xia
-#   Ran Shu
 #
 
-import os, sys, re, inspect
-def module_path():
-    ''' returns the module path without the use of __file__.
-    from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
-    return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
-sys.path.append(module_path())
+"""
+This module provides several components that can manipulate the trace
+collected from Android devices. 
+"""
 
-# The MonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
-from MonkeyHelper import EMonkeyDevice
-
-# the doc for the MT protocol can be found here:
-# https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
-
-# The parcel exchanged between different steps of a pipeline
-class PipelineParcel:
-    def __init__(self):
-        self.q = []
-    def enqueue(self, obj):
-        self.q.append(obj)
-    def dequeue(self):
-        return self.q.pop(0)
-    def isEmpty(self):
-        return len(self.q) == 0
+import re, sys
+from Pipeline import PipelineParcel
 
 class MotionEvent:
+    """ This data structure describes a single evdev report
+    """
     timestamp = 0
     tracking_id = 0xFFFFFFFF
     touch_major = 0
@@ -65,6 +49,8 @@ class MotionEvent:
         return s
 
 class GeteventCommand:
+    """ This data structure describes a single command from Android getevent utility
+    """
     timestamp = 0
     evType = ""
     evCmd = ""
@@ -72,16 +58,20 @@ class GeteventCommand:
     def __str__(self):
         return str((self.timestamp, self.evType, self.evCmd, self.evVal))
 
-# A Type A multi-touch screen
-# a list of supported features:
+# the doc for the MT protocol can be found here:
+# https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
 class MultiTouchTypeAParser:
-    NAVIGATION_HEIGHT = 48
+    """ A type-A multi-touch evdev device
+    """
+    NAVIGATION_HEIGHT = 48 # the height of the standard navigation bar at the bottom, in pixels
     def __init__(self):
         self.currentSlot = MotionEvent()
         self.listMotions = []
         self.dontReport = False # one-shot disabler
     def next(self, geteventCmd):
+        """ Take a stream of getevent commands and produces motion events
+        """
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
             if geteventCmd.evCmd == "ABS_MT_POSITION_X" or geteventCmd.evCmd == "ABS_X":
@@ -127,14 +117,14 @@ class MultiTouchTypeAParser:
             print "[WARN] Type A MT skips unknown line:" + str(geteventCmd)
         return parcel
         
-
-# A type B multi-touch screen
-# a list of supported features:
-# MT_PRESSURE, MT_POSITION_X, MT_POSITION_Y, TRACKING_ID, SLOT, TOUCH_MAJOR
-# unsupported:
-# ABS_MT_TOUCH_MINOR, ABS_MT_WIDTH_MAJOR, ABS_MT_WIDTH_MINOR, ABS_MT_DISTANCE
-# ABS_MT_ORIENTATION, ABS_MT_TOOL_X, ABS_MT_TOOL_Y
 class MultiTouchTypeBParser:
+    """ A type-B multi-touch screen
+    a list of supported features:
+    MT_PRESSURE, MT_POSITION_X, MT_POSITION_Y, TRACKING_ID, SLOT, TOUCH_MAJOR
+    unsupported:
+    ABS_MT_TOUCH_MINOR, ABS_MT_WIDTH_MAJOR, ABS_MT_WIDTH_MINOR, ABS_MT_DISTANCE
+    ABS_MT_ORIENTATION, ABS_MT_TOOL_X, ABS_MT_TOOL_Y
+    """
     NAVIGATION_HEIGHT = 48 # the standard navigation bar at the bottom
     def __init__(self):
         # states
@@ -142,6 +132,8 @@ class MultiTouchTypeBParser:
         self.currentSlot = MotionEvent()
         self.slots = [self.currentSlot]
     def next(self, geteventCmd):
+        """ Takes a stream of getevent commands and produce motion events
+        """
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
             if geteventCmd.evCmd == "ABS_MT_SLOT":
@@ -179,32 +171,41 @@ class MultiTouchTypeBParser:
             print "[WARN] Type B MT skips unknown line:" + str(geteventCmd)
         return parcel
 
-# A generic printer, print whatever given
 class GenericPrinter:
+    """ A generic printer, print whatever given
+    """
     def next(self, whatever):
+        """ Takes whatever object and print its string representation
+        """
         print str(whatever)
         return PipelineParcel()
 
-# A text file reader which reads the file line by line
 class TextFileLineReader:
+    """ A text file reader which reads the file line by line
+    """
     def __init__(self, tracePath):
         self.fp = open(tracePath)
     def next(self, dummy):
+        """ Takes nothing and produces lines from the file
+        """
         parcel = PipelineParcel()
         line = self.fp.readline()
         if line != "":
             parcel.enqueue(line)
         return parcel        
 
-# A trace parser for raw getevent trace
 class RawTraceParser:
+    """ A trace parser for raw getevent traces
+    """
     def __init__(self):
-        # a line is in the format of:
-        # "time(float) evType(str) evCmd(str) evVal(int)"
-        # refer to Linux evdev for details
-        # here we assume the line is a readable dump from getevent
         self.pattern = re.compile("\\[\s*(\d+\.\d+)\\]\s*(\w+)\s*(\w+)\s*(\w+)")
     def next(self, line):
+        """ Takes a single line of the raw trace and produces a getevent command object
+        a line is in the format of:
+        time(float) evType(str) evCmd(str) evVal(int)
+        refer to the Linux evdev doc for details
+        here we assume the line is dumped from `getevent -lt <EVDEV>
+        """
         m = self.pattern.match(line)
         e = GeteventCommand()
         if m is None:
@@ -223,14 +224,16 @@ class RawTraceParser:
         parcel.enqueue(e)
         return parcel
 
-# decompose the TypeA/TypeB motionEvent stream into finger trails
 class FingerDecomposer:
+    """ Decompose motion event stream into finger trails
+    """
     def __init__(self):
         self.tracker = {}
     def next(self, listMotionEvents):
+        """ Takes a list of motion events and produces finger trails
+        """
         prev = self.tracker
         alive = {}
-        parcel = PipelineParcel()
         for e in listMotionEvents:
             if e.tracking_id in prev:
                 t = prev[e.tracking_id]
@@ -240,74 +243,30 @@ class FingerDecomposer:
             else:
                 alive[e.tracking_id] = [e]
         self.tracker = alive
+        parcel = PipelineParcel()
         for trail in prev.values():
             parcel.enqueue(trail)
         return parcel
 
-class MonkeyHelperReplayer:
-    def __init__(self): 
-        self.device = EMonkeyDevice()
-        self.lastTimeStamp = None
-        self.SCREEN_SCALING = 1 # 0.8 for tablet
-    def scaleXY(self, motionEvent, factor):
+class TrailScaler:
+    """ Scale the coordinates of the motion events in the trail
+    Used to adapt the trail from one device to another with a different resolution
+    """
+    def __init(self, factor):
+        self.factor = factor
+    @staticmethod
+    def scaleXY( motionEvent, factor):
         tempXValue = float(motionEvent.x)
         tempYValue = float(motionEvent.y)
-        tempXValue = int((tempXValue * self.SCREEN_SCALING)+0.5)
-        tempYValue = int((tempYValue * self.SCREEN_SCALING)+0.5)
+        tempXValue = int((tempXValue * factor)+0.5)
+        tempYValue = int((tempYValue * factor)+0.5)
         motionEvent.x = tempXValue
         motionEvent.y = tempYValue
     def next(self, trail):
-        if self.lastTimeStamp is None: # in case this is the beginning of the entire trace
-            self.lastTimeStamp = trail[0].timestamp
-        lastTimeStamp = self.lastTimeStamp
-        if len(trail) <= 0:
-            print "[WARN] perform an empty trail"
-        elif len(trail) == 1:
-            actions = [EMonkeyDevice.DOWN_AND_UP]
-        else:
-            actions = [EMonkeyDevice.DOWN] + [EMonkeyDevice.MOVE] * (len(trail) - 2) + [EMonkeyDevice.UP]
-        for count in range(len(trail)):
-            self.device.sleep(trail[count].timestamp - lastTimeStamp)
-            self.device.touch(trail[count].x, trail[count].y, actions[count])
-            lastTimeStamp = trail[count].timestamp
-        self.lastTimeStamp = lastTimeStamp
-        return PipelineParcel()
-        
-class Pipeline:
-    def __init__(self):
-        self.pl = []
-    def execute(self):
-        first = self.pl[0]
-        while True:
-            parcel = first.next(None)
-            if parcel.isEmpty():
-                break
-            while not parcel.isEmpty():
-                obj = parcel.dequeue()
-                self._executeSingleStep(1, obj)
-    def _executeSingleStep(self, index, obj):
-        if index >= len(self.pl):
-            return None
-        parcel = self.pl[index].next(obj)
-        while not parcel.isEmpty():
-            nextObj = parcel.dequeue()
-            self._executeSingleStep(index+1, nextObj)
-    def addStep(self, step):
-        self.pl.append(step)
-
-def main():
-    if len(sys.argv) <= 1:
-        print "Usage: python test.py TRACE_PATH"
-        print "The trace must be generated from getevent -lt [EVDEV]"
-        return 1
-    pl = Pipeline()
-    pl.addStep(TextFileLineReader(sys.argv[1]))
-    pl.addStep(RawTraceParser())
-    pl.addStep(MultiTouchTypeAParser())
-    pl.addStep(FingerDecomposer())
-    pl.addStep(MonkeyHelperReplayer())
-    # pl.addStep(GenericPrinter())
-    pl.execute()
-
-if __name__ == "__main__":
-    main()
+        """ Takes a trail and produces a scaled trail with given factor
+        """
+        for e in trail:
+            self.scaleXY(e, self.factor)
+        parcel = PipelineParcel()
+        parcel.enqueue(trail)
+        return parcel
