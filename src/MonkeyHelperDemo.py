@@ -1,4 +1,3 @@
-#!/usr/bin/python
 #
 # Copyright 2014 Mingyuan Xia (http://mxia.me) and others
 #
