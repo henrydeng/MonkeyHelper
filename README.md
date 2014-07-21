@@ -11,6 +11,10 @@ MonkeyHelper offers recording, replaying and manipulation  capabilities for Andr
 
 [![Replay Painting](http://img.youtube.com/vi/4j8VpAO4XCg/0.jpg)](http://www.youtube.com/watch?v=4j8VpAO4XCg)
 
+* Capture live trace, learn user's scrolling pattern and then automaically scroll at user's pace!!
+* 
+[![Replay AngryBirds](http://img.youtube.com/vi/9H-AOy5R7-M/0.jpg)](http://www.youtube.com/watch?v=9H-AOy5R7-M)
+
 # Use cases
 We highlight some use cases that could be useful for different purposes.
 * Record a trace from an Android box and replay it. This could be useful for debugging and testing apps. The trace can be stored as a simple text file, essentially everywhere.
