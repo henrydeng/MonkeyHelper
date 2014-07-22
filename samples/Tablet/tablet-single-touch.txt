@@ -1,0 +1,9 @@
+[  212916.728517] EV_ABS       ABS_MT_TRACKING_ID   00000000            
+[  212916.728632] EV_ABS       ABS_MT_TOUCH_MAJOR   00000040            
+[  212916.728659] EV_ABS       ABS_MT_PRESSURE      00000040            
+[  212916.728688] EV_ABS       ABS_MT_POSITION_X    00000470            
+[  212916.728717] EV_ABS       ABS_MT_POSITION_Y    000001e8            
+[  212916.728746] EV_SYN       SYN_MT_REPORT        00000000            
+[  212916.728769] EV_SYN       SYN_REPORT           00000000            
+[  212916.896590] EV_SYN       SYN_MT_REPORT        00000000            
+[  212916.896640] EV_SYN       SYN_REPORT           00000000            

@@ -1,0 +1,6 @@
+[     335.519172] EV_ABS       ABS_X                00000163            
+[     335.519508] EV_ABS       ABS_Y                00000397            
+[     335.519804] EV_KEY       BTN_TOUCH            DOWN                
+[     335.519891] EV_SYN       SYN_REPORT           00000000            
+[     335.738695] EV_KEY       BTN_TOUCH            UP                  
+[     335.738915] EV_SYN       SYN_REPORT           00000000            
