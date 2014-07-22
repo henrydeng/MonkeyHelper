@@ -8,14 +8,17 @@ This folder contains several example traces that could be used to test the toolc
 * ./Emulator/emulator-three-touches.txt
 
 ## Phone traces
-* ./Phone/galaxys-paint.txt: the painting app, demo at http://www.youtube.com/watch?v=4j8VpAO4XCg
-* ./Phone/phone-CalenderaddEvent.txt
-* ./Phone/phone-openCalender.txt
-* ./Phone/phone-playAngryBirdsLevel1.txt
-* ./Phone/phone-single-drag.txt
-* ./Phone/phone-single-touch.txt
-* ./Phone/phone-three-touches.txt
-* ./Phone/phone-two-finger-drag.txt
+
+| Trace file | Description | Demo |
+| -- | -- | -- |
+| ./Phone/galaxys-paint.txt | the painting app | http://www.youtube.com/watch?v=4j8VpAO4XCg
+| ./Phone/phone-CalenderaddEvent.txt | add an event to the built-in calendar app |
+| ./Phone/phone-openCalender.txt | open the built-in calendar app |
+| ./Phone/phone-playAngryBirdsLevel1.txt | play through level 1 of AngryBirds |
+| ./Phone/phone-single-drag.txt | a simple drag | 
+| ./Phone/phone-single-touch.txt | a simple touch |
+| ./Phone/phone-three-touches.txt | touch for three times | 
+| ./Phone/phone-two-finger-drag.txt | two fingers on the screen |
 
 ## Tablet traces
 * ./Tablet/tablet-AngryBirdsMultipleLevels.txt: play the angry birds and pass several levels, demo at http://www.youtube.com/watch?v=vYlO0UrhRR8
