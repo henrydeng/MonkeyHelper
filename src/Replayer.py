@@ -46,10 +46,10 @@ def main():
     pl.addStep(dtm.RelativeTimingConverter())
     pl.addStep(dtm.FingerDecomposer())
     # this step might be necessary for a tablet
-    # pl.addStep(TrailScaler(0.8))
+    # pl.addStep(dtm.TrailScaler(0.8))
     # pl.addStep(dtm.TimeScaler(0.25))
     pl.addStep(MonkeyHelperReplayer())
-    # pl.addStep(GenericPrinter())
+    # pl.addStep(dtm.GenericPrinter())
     pl.execute()
     print "Replay finished"
         
