@@ -74,6 +74,8 @@ class MultiTouchTypeAParser:
         """
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
+            if self.currentSlot is None:
+                self.currentSlot = MotionEvent()
             if geteventCmd.evCmd == "ABS_MT_POSITION_X" or geteventCmd.evCmd == "ABS_X":
                 self.currentSlot.x = geteventCmd.evVal
             elif geteventCmd.evCmd == "ABS_MT_POSITION_Y" or geteventCmd.evCmd == "ABS_Y":
@@ -97,20 +99,21 @@ class MultiTouchTypeAParser:
             else:
                 print "[WARN] TYPEA MT meets unknown evCmd" + str(geteventCmd)
         elif geteventCmd.evType == "EV_SYN":
-            if self.currentSlot is not None:
-                self.currentSlot.timestamp = geteventCmd.timestamp
-                self.listMotions.append(self.currentSlot)
-            else:
-                self.currentSlot = MotionEvent()
             if geteventCmd.evCmd == "SYN_REPORT":
+                if self.currentSlot is not None:
+                    self.currentSlot.timestamp = geteventCmd.timestamp
+                    self.listMotions.append(self.currentSlot)
+                    self.currentSlot = self.currentSlot.clone()
                 if self.dontReport:
                     self.dontReport = False
                 else:
                     parcel.enqueue(self.listMotions)
                 self.listMotions = []
-                self.currentSlot = self.currentSlot.clone()
             elif geteventCmd.evCmd == "SYN_MT_REPORT":
-                pass
+                if self.currentSlot is not None:
+                    self.currentSlot.timestamp = geteventCmd.timestamp
+                    self.listMotions.append(self.currentSlot)
+                    self.currentSlot = None
             else:
                 print "[WARN] Type A MT meets unknown evCmd" + str(geteventCmd)
         else:
@@ -292,8 +295,10 @@ class RelativeTimingConverter:
     def next(self, listMotionEvents):
         if self.baseTimestamp is None:
             self.baseTimestamp = listMotionEvents[0].timestamp
+            print self.baseTimestamp
         for e in listMotionEvents:
-            e.timestamp = e.timestamp - self.baseTimestamp
+            e.timestamp -= self.baseTimestamp
+            print e.timestamp
         parcel = PipelineParcel()
         parcel.enqueue(listMotionEvents)
         return parcel
