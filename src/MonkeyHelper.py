@@ -102,8 +102,11 @@ class EMonkeyDevice:
 		self.dev.removePackage(package)
 	def shell(self, cmd):
 		return self.dev.shell(cmd)
-	def startActivity(self, uri, action, data, mimetype, extras, component, flags):
-		self.dev.startActivity(uri, action, data, mimetype, extras, component, flags)
+	def startActivity(self, uri = None, action = None, data = None,
+					mimetype = None, categories = [], extras = {},
+					component = None, flags = 0):
+		self.dev.startActivity(uri, action, data, mimetype, categories, 
+							extras,	component, flags)
 	def takeSnapshot(self):
 		return self.dev.takeSnapshot()
 	def touch(self, x, y, t = DOWN_AND_UP):
