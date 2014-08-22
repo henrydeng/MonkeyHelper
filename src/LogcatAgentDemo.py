@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # 
-# Contributors:
+# Contributor(s):
 #   Mingyuan Xia
 #
 
-"""
-This script demonstrates how to replay a trace to a Android device. You need
+""" This script demonstrates how to read the logcat output from a device. You need
 monkeyrunner to run scripts once including this module
 """
 
@@ -34,14 +33,15 @@ import LogcatAgent as la
 import time
 
 def main():
-    """ This example dumps all error messages in logcat and then clear it
-    After 5 seconds, it dumps all messages and finishes
-    Note the encoding problem, logcat encodes output with utf-8
+    """ This example dumps all error messages in logcat and then clear it.
+    After 5 seconds, it dumps all messages and finishes.
+    Note that logcat encodes its output with utf-8
     """
     device = mh.EMonkeyDevice()
     agent = la.LogcatAgent(device)
     print agent.dump(fmt = None, filterTuples = [('*','E')])
     agent.clear()
+    print 'Waiting for 5 seconds...'
     time.sleep(5)
     print agent.dump()
 

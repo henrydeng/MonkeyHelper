@@ -13,21 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # 
-# Contributors:
+# Contributor(s):
 #   Mingyuan Xia
 #
 
-""" LogcatAgent controls logcat, the logging facility of Android
-"""
 class LogcatAgent:
+    MAIN = 'main'
+    EVENTS = 'events'
+    RADIO = 'radio'
+    """ LogcatAgent controls logcat, the logging facility of Android"""
     def __init__(self, device):
-        self.device = device
-    def clear(self):
-        self.device.shell('logcat -c')
-    def dump(self, fmt = None, filterTuples = []):
+        """ Initialize the agent with a given device
+        @param device: should be an EMonkeyDevice
         """
+        self.device = device
+    def logcat(self, args):
+        """ Send a raw logcat command and return its output"""
+        s = "logcat"
+        for arg in args:
+            s += ' ' + arg
+        return self.device.shell(s).encode('utf-8')
+    def clear(self):
+        """ Clear the logcat logs"""
+        self.logcat(['-c'])
+    def dumpBuf(self, buf = MAIN):
+        return self.logcat(['-b ', buf])
+    def dump(self, fmt = None, filterTuples = []):
+        """ Dump the logcat logs with given filters and formats
         @param fmt: the output format
-        @param filterTuples: a list of (TAG,LEVEL) tuples that specifies the filter
+        @param filterTuples: a list of (TAG,LEVEL) tuples that specify filtering 
         according to Android doc, LEVEL could be:
         V - Verbose (lowest priority)
         D - Debug
@@ -37,9 +51,10 @@ class LogcatAgent:
         F - Fatal
         S - Silent (highest priority, on which nothing is ever printed)
         """
-        cmd = 'logcat -d'
+        cmd = ['-d']
         if fmt is not None:
-            cmd += ' -v ' + fmt
+            cmd.append('-v')
+            cmd.append(fmt)
         for tp in filterTuples:
-            cmd += ' %s:%s' % tp
-        return self.device.shell(cmd).encode('utf-8')
+            cmd.append('%s:%s' % tp)
+        return self.logcat(cmd)
