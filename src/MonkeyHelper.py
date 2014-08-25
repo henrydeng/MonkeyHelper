@@ -89,6 +89,8 @@ class EMonkeyDevice:
 		self.dev.installPackage(path)
 	def instrument(self, className, args):
 		return self.dev.instrument(className, args)
+	def loadImageFromFile(self,fileName):
+        	return MonkeyRunner.loadImageFromFile(fileName)
 	def press(self, name, t = DOWN_AND_UP):
 		self.dev.press(name, t)
 		return self
