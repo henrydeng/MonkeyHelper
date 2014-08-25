@@ -17,33 +17,31 @@
 #   Ran Shu
 #
 
-# Imports the monkeyrunner modules used by this program
-from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice, MonkeyImage
-
+# Imports the monkeyrunner module used by this program
+from MonkeyHelper import EMonkeyDevice
 
 class SnapshortAgent :
     def __init__(self):
-        self.device = MonkeyRunner.waitForConnection()
+        self.device = EMonkeyDevice()
         
-    def takeSnapShot(self):
-        page=self.device.takeSnapshot()
-        return page
+    def takeSnapshot(self):
+        snapshot=self.device.takeSnapshot()
+        return snapshot
     
-    def saveSnapShot(self, page):
-        fileName = raw_input('Enter a file name: ')
-        page.writeToFile(fileName+'.png','png')
+    def saveSnapshot(self, snapshot, fileName):
+        snapshot.writeToFile(fileName+'.png','png')
+        
+    def compareSnapshots (self, snapshot1, snapshot2):
+        return snapshot1.sameAs(snapshot2, 1)
+
+    def takeAndCompareSnapshots(self, snapshotCheck):
+        currentSnapshot=self.device.takeSnapshot()
+        return self.compareSnapshots(currentSnapshot, snapshotCheck)
+        
+    def getSubSnapshot (self, snapshot, coordinates):
+        subsnapshot=snapshot.getSubImage(coordinates)
+        return subsnapshot
     
-    def checkCurrentPage(self, pageCheck):
-        currentPage=SnapshortAgent.takeSnapShot()
-        SnapshortAgent.checkTwoPages(currentPage, pageCheck)
-        
-    def checkTwoPages (self, page1, page2):
-        if page1.sameAs(page2, 1):
-            return True
-        else :
-            return False
-        
-    def getSubPage (self, page):
-        subPageSize = raw_input('Enter the x,y coordinates followed by the width and the height of the subImage: ')
-        subPage=page.getSubImage(tuple(map(int,subPageSize.split(','))))
-        return subPage
+    def loadSnapshot (self, fileName):
+        snapshot = self.device.loadImageFromFile(fileName)
+        return snapshot
