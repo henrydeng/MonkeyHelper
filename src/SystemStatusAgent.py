@@ -22,15 +22,16 @@ from MonkeyHelper import MonkeyRunner
 import re
 
 class SystemStatusAgent:
+
     def __init__(self,device):
         self.device=device
 
-    def getWiFiStatus(self):
+    def getWifiStatus(self):
         """Possible status:
            disabled | connected | enabled | disconnected
         """
         msg=self.device.shell("dumpsys wifi").encode('utf-8')
-        pat=re.compile(r'^Wi-Fi is (.*)')
+        pat=re.compile(r'^Wi-Fi is (\w*)')
         try:
             status=pat.findall(msg)[0]
             if status!="":
@@ -41,7 +42,7 @@ class SystemStatusAgent:
             print "Fail to acquire WiFi status!"
             return False
 
-    def getCelluarDataStatus(self):
+    def getCellularDataStatus(self):
         """Possible status:
             0 - DATA_DISCONNECTED (Disconnected. IP traffic not available. )
             1 - DATA_CONNECTING(Currently setting up a data connection.)
@@ -60,11 +61,15 @@ class SystemStatusAgent:
             print "Fail to acquire Cellular data connection status!"
             return False
 
+        #TODO
+        #def getScreenRotationStatus(self):
+
+
 
 
 if __name__=='__main__':
     device=MonkeyRunner.waitForConnection()
     test=SystemStatusAgent(device)
-    print test.getWiFiStatus()
-    print test.getCelluarDataStatus()
+    print test.getWifiStatus()
+    print test.getCellularDataStatus()
 
