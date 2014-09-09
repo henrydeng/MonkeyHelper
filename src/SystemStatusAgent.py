@@ -61,15 +61,62 @@ class SystemStatusAgent:
             print "Fail to acquire Cellular data connection status!"
             return False
 
-        #TODO
-        #def getScreenRotationStatus(self):
+    def getScreenRotationStatus(self):
+        """Possible status
+           1 - Rotation locked
+           0 - Auto Rotation
+        """
+        msg=self.device.shell('dumpsys window').encode('utf-8')
+        pat=re.compile(r'mUserRotationMode=([01])')
+        try:
+            status=pat.findall(msg)[0]
+            if status in ['0','1']:
+                return status
+            else:
+                raise Exception()
+        except Exception:
+            print "Fail to acquire screen rotation status!"
+            return False
 
+    def getOrientation(self):
+        """Possible status:
+           0 - portrait
+           1 - landscape (left side down)
+           2 - portrait (upside down)
+           3 - landscape (right side down)
+        """
+        msg=self.device.shell('dumpsys display').encode('utf-8')
+        pat=re.compile(r'mCurrentOrientation=([0-3])')
+        try:
+            status=pat.findall(msg)[0]
+            if status in ['0','1','2','3']:
+                return status
+            else:
+                raise Exception()
+        except Exception:
+            print "Fail to acquire screen orientation!"
+            return False
 
-
+    def getBatteryLevel(self):
+        """return the remaining percentage of battery
+        """
+        msg=self.device.shell('dumpsys battery').encode('utf-8')
+        pat=re.compile(r'level: (\d*)')
+        try:
+            status=pat.findall(msg)[0]
+            if 0<=int(status)<=100 :
+                return status
+            else:
+                raise Exception()
+        except Exception:
+            print "Fail to acquire the battery level!"
+            return False
 
 if __name__=='__main__':
     device=MonkeyRunner.waitForConnection()
     test=SystemStatusAgent(device)
     print test.getWifiStatus()
     print test.getCellularDataStatus()
-
+    print test.getOrientation()
+    print test.getScreenRotationStatus()
+    print test.getBatteryLevel()
