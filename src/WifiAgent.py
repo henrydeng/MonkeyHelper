@@ -32,7 +32,7 @@ class WifiAgent:
         """ Need root access
         """
         try:
-            os.system('adb root')
+            os.system('adb root > /dev/null')
             self.device.shell('svc wifi enable').encode('utf-8')
             return True
         except:
@@ -43,7 +43,7 @@ class WifiAgent:
         """ Need root access
         """
         try:
-            os.system('adb root')
+            os.system('adb root > /dev/null')
             self.device.shell('svc wifi disable').encode('utf-8')
             return True
         except:
