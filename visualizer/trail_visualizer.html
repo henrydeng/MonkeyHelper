@@ -1,92 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>Haha</title>
+<title>Visual and manipulate finger trails</title>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>haha</title>
-	<style>
-	body {
-	margin: 0px;
-	padding: 0px;
-	}
+  <title>Visualize and manipulate Android traces</title>
+  <style>
+    body {
+      margin: 0px;
+      padding: 0px;
+    }
+    #canvas {
+    	position: absolute;
+    }
 	</style>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
-	<div id="container"></div>
-    <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
-    <script>
-	// Kinetic Example
-	var stage = new Kinetic.Stage({
-	    container: 'container',
-	    width: 360,
-	    height: 480
-	});
-	var layer = new Kinetic.Layer();
-	stage.add(layer);
-
-	var data = [{x:30,y:30},{x:180,y:60},{x:80,y:180},{x:100,y:40}];
-	var c = null;
-
-	for (var i = 0; i < data.length; ++i) {
-		c = newCircle(data[i].x, data[i].y, 3, "blue", c);
-	}
-
-	function newCircle(x, y, r, fill, beforeShape) {
-
-	    var circle = new Kinetic.Circle({
-	        x: x,
-	        y: y,
-	        radius: r,
-	        fill: fill,
-	        stroke: fill,
-	        strokeWidth: 3,
-	        draggable: true
-	    });
-	    layer.add(circle);
-
-	    if (beforeShape) {
-	        var connector = new Kinetic.Line({
-	            points: [
-	                beforeShape.getX(),
-	                beforeShape.getY(),
-	                x,
-	                y
-	            ],
-	            stroke: "blue",
-	            strokeWidth: 3
+<div class="container">
+  <div class="row">
+	<div class="col-sm-4" style="padding-left: 0px;">
+	  <img id="frame"/>
+	  <div id="canvas"></div>
+	</div>
+	<div class="col-sm-8">
+      <div class="panel panel-info">
+	      <div class="panel-heading">
+	        <h3 class="panel-title"><b>Status</b></h3>
+	      </div>
+	      <div class="panel-body" id="appaudit">
+	      	<div class="dropdown">
+			  <button class="btn btn-default dropdown-toggle" type="button" id="deviceDropDown" data-toggle="dropdown">
+			    Switch device
+			    <span class="caret"></span>
+			  </button>
+			  <ul id="devices" class="dropdown-menu" role="menu" aria-labelledby="deviceDropDown">
+			    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Samsung Galaxy Nexus S</a></li>
+			    <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Google Nexus 5</a></li>
+			  </ul>
+			</div>
+	      	<ul>
+	      		<li> max_x=
+	      		<li> max_y=
+	      		<li> x=
+	      		<li> y=
+	      	</ul>
+		    <pre id="output"></pre>
+	      </div>
+	  </div>
+	</div>
+  </div>
+</div>
+<script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.2.min.js"></script>
+  <script>
+ 	function sel_phone(model, data) {
+	    // phone spec
+	    var phones = {
+	    	"Samsung Galaxy Nexus S": {
+	    		width: 720,
+	    		height: 1280,
+	    		scale: 2,
+	    		frame_width: 400,
+	    		frame_top: 87,
+	    		frame_left: 21,
+	    		frame_img: 'img/samsung-galaxy-s.png'
+	    	},
+	    	"Google Nexus 5": {
+	    		width: 1080,
+	    		height: 1920,
+	    		scale: 3,
+	    		frame_width: 400,
+	    		frame_top: 60,
+	    		frame_left: 19,
+	    		frame_img: 'img/google-nexus-5.png'
+	    	}
+	    };
+ 		phone = phones[model];
+ 		console.log('Phone switched to ' + model);
+ 		$('#frame').attr('src',phone.frame_img);
+ 		$('#frame').load();
+ 		$('#frame').width(phone.frame_width);
+ 		$('#canvas').css('top', phone.frame_top);
+ 		$('#canvas').css('left', phone.frame_left);
+ 		refresh_all(phone, data);
+ 		output(data);
+ 	}
+    function output(data) {
+    	var s = JSON.stringify(data, undefined, 2);
+    	$('#output').text(s);
+    	$('#output').show();
+    }
+    function refresh_all(phone, data) {
+		var stage = new Kinetic.Stage({
+		    container: 'canvas',
+		    width: phone.width/phone.scale,
+		    height: phone.height/phone.scale
+		});
+		var layer = new Kinetic.Layer();
+		stage.add(layer);
+		var bg = new Kinetic.Rect({
+	            x: 0,
+	            y: 0,
+	            width: phone.width/phone.scale,
+	            height: phone.height/phone.scale,
+	            fill: 'black',
 	        });
-	        layer.add(connector);
-	        connector.moveToBottom();
-	        beforeShape.afterShape = circle;
-	        beforeShape.afterConnector = connector;
-	    }
-	    circle.beforeShape = beforeShape;
-	    circle.beforeConnector = connector;
-	    circle.afterShape = null;
-	    circle.afterConnector = null;
-	    circle.on("dragmove", function () {
-	        if (this.beforeShape) {
-	            this.beforeConnector.setPoints([
-	                this.beforeShape.getX(),
-	                this.beforeShape.getY(),
-	                this.getX(),
-	                this.getY()
-	            ]);
-	        }
-	        if (this.afterShape) {
-	            this.afterConnector.setPoints([
-	                this.getX(),
-	                this.getY(),
-	                this.afterShape.getX(),
-	                this.afterShape.getY()
-	            ]);
-	        }
-	    });
+		layer.add(bg);
+		var c = null;
+		var circles = [];
+		for (var i = 0; i < data.length; ++i) {
+			c = newCircle(data[i], 3, "white", c);
+			circles[i] = c;
+		}
+		// make sure circles are on top, then lines, finally bg
+		for (var i = 0; i < circles.length; ++i) {
+			circles[i].moveToTop();
+		}
+		bg.moveToBottom();
 
-	    layer.draw();
-	    return (circle);
-	}
+		function newCircle(data, r, fillColor, beforeShape) {
+			var x = data.x, y = data.y;
+		    var circle = new Kinetic.Circle({
+		        x: x,
+		        y: y,
+		        radius: r,
+		        fill: fillColor,
+		        stroke: fillColor,
+		        strokeWidth: 3,
+		        draggable: true
+		    });
+		    circle.myPoint = data;
+		    layer.add(circle);
+
+		    if (beforeShape) {
+		        var connector = new Kinetic.Line({
+		            points: [
+		                beforeShape.getX(),
+		                beforeShape.getY(),
+		                x,
+		                y
+		            ],
+		            stroke: fillColor,
+		            strokeWidth: 3
+		        });
+		        layer.add(connector);
+		        beforeShape.afterShape = circle;
+		        beforeShape.afterConnector = connector;
+		    }
+		    circle.beforeShape = beforeShape;
+		    circle.beforeConnector = connector;
+		    circle.afterShape = null;
+		    circle.afterConnector = null;
+		    circle.on("dragmove", function () {
+		        if (this.beforeShape) {
+		            this.beforeConnector.setPoints([
+		                this.beforeShape.getX(),
+		                this.beforeShape.getY(),
+		                this.getX(),
+		                this.getY()
+		            ]);
+		        }
+		        if (this.afterShape) {
+		            this.afterConnector.setPoints([
+		                this.getX(),
+		                this.getY(),
+		                this.afterShape.getX(),
+		                this.afterShape.getY()
+		            ]);
+		        }
+		        this.myPoint.x = this.getX();
+		        this.myPoint.y = this.getY();
+		        output();
+		    });
+		    circle.on('mouseleave', function() {
+		    	this.radius(r);
+		    	layer.draw();
+		    });
+		    circle.on('mouseover', function() {
+		        this.radius(r*2);
+		    	layer.draw();
+		    });
+		    layer.draw();
+		    return (circle);
+		}
+    }
+	</script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script>
+	$( document ).ready(function() {
+		// trail data, TODO should load from somewhere
+	    var data = [{x:30,y:30,t:1},{x:180,y:60,t:2},{x:80,y:180,t:3},{x:100,y:40,t:4}];
+	    sel_phone('Google Nexus 5', data);
+	    $('#devices').delegate('li', 'click', function() {
+	    	sel_phone($(this).text(), data);
+	    });
+	});
 	</script>
 </body>
 </html>
