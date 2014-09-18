@@ -118,8 +118,8 @@
 		}
 		bg.moveToBottom();
 
-		function newCircle(data, r, fillColor, beforeShape) {
-			var x = data.x, y = data.y;
+		function newCircle(point, r, fillColor, beforeShape) {
+			var x = point.x, y = point.y;
 		    var circle = new Kinetic.Circle({
 		        x: x,
 		        y: y,
@@ -129,7 +129,7 @@
 		        strokeWidth: 3,
 		        draggable: true
 		    });
-		    circle.myPoint = data;
+		    circle.myPoint = point;
 		    layer.add(circle);
 
 		    if (beforeShape) {
@@ -170,7 +170,7 @@
 		        }
 		        this.myPoint.x = this.getX();
 		        this.myPoint.y = this.getY();
-		        output();
+		        output(data);
 		    });
 		    circle.on('mouseleave', function() {
 		    	this.radius(r);
