@@ -23,7 +23,7 @@ collected from Android devices.
 """
 
 import re, sys
-from Pipeline import PipelineParcel
+from Pipeline import PipelineParcel, PipelineComponent
 
 class MotionEvent:
     """ This data structure describes a single evdev report
@@ -61,7 +61,7 @@ class GeteventCommand:
 # the doc for the MT protocol can be found here:
 # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
 
-class MultiTouchTypeAParser:
+class MultiTouchTypeAParser(PipelineComponent):
     """ A type-A multi-touch evdev device
     """
     NAVIGATION_HEIGHT = 48 # the height of the standard navigation bar at the bottom, in pixels
@@ -70,7 +70,7 @@ class MultiTouchTypeAParser:
         self.listMotions = []
         self.dontReport = False # one-shot disabler
     def next(self, geteventCmd):
-        """ Take a stream of getevent commands and produces motion events
+        """ Take a stream of getevent commands and produce motion events
         """
         parcel = PipelineParcel()
         if geteventCmd.evType == "EV_ABS":
@@ -120,7 +120,7 @@ class MultiTouchTypeAParser:
             print "[WARN] Type A MT skips unknown line:" + str(geteventCmd)
         return parcel
         
-class MultiTouchTypeBParser:
+class MultiTouchTypeBParser(PipelineComponent):
     """ A type-B multi-touch screen
     a list of supported features:
     MT_PRESSURE, MT_POSITION_X, MT_POSITION_Y, TRACKING_ID, SLOT, TOUCH_MAJOR
@@ -174,7 +174,7 @@ class MultiTouchTypeBParser:
             print "[WARN] Type B MT skips unknown line:" + str(geteventCmd)
         return parcel
 
-class GenericPrinter:
+class GenericPrinter(PipelineComponent):
     """ A generic printer, print whatever given
     """
     def next(self, whatever):
@@ -183,7 +183,7 @@ class GenericPrinter:
         print str(whatever)
         return PipelineParcel()
 
-class TextFileLineReader:
+class TextFileLineReader(PipelineComponent):
     """ A text file reader which reads the file line by line
     """
     def __init__(self, tracePath):
@@ -197,7 +197,7 @@ class TextFileLineReader:
             parcel.enqueue(line)
         return parcel        
 
-class RawTraceParser:
+class RawTraceParser(PipelineComponent):
     """ A trace parser for raw getevent traces
     """
     def __init__(self):
@@ -227,7 +227,7 @@ class RawTraceParser:
         parcel.enqueue(e)
         return parcel
 
-class FingerDecomposer:
+class FingerDecomposer(PipelineComponent):
     """ Decompose motion event stream into finger trails
     """
     def __init__(self):
@@ -251,7 +251,7 @@ class FingerDecomposer:
             parcel.enqueue(trail)
         return parcel
 
-class TrailScaler:
+class TrailScaler(PipelineComponent):
     """ Scale the coordinates of the motion events in the trail
     Used to adapt the trail from one device to another with a different resolution
     """
@@ -274,7 +274,7 @@ class TrailScaler:
         parcel.enqueue(trail)
         return parcel
 
-class TimeScaler:
+class TimeScaler(PipelineComponent):
     """ Scale the time of a trail, e.g. accelerate/decelerate the replaying
     """
     def __init__(self, factor):
@@ -288,17 +288,15 @@ class TimeScaler:
         parcel.enqueue(trail)
         return parcel
     
-class RelativeTimingConverter:
-    """
+class RelativeTimingConverter(PipelineComponent):
+    """ Convert all timestamp based on the first one in the trace
     """
     baseTimestamp = None
     def next(self, listMotionEvents):
         if self.baseTimestamp is None:
             self.baseTimestamp = listMotionEvents[0].timestamp
-            print self.baseTimestamp
         for e in listMotionEvents:
             e.timestamp -= self.baseTimestamp
-            print e.timestamp
         parcel = PipelineParcel()
         parcel.enqueue(listMotionEvents)
         return parcel

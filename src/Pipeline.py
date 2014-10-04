@@ -17,7 +17,14 @@
 #   Mingyuan Xia
 #
 
-""" This module provides the facilities to support component based design
+""" This module provides the pipeline design. A pipeline contains several
+stages where each retrieves outputs from its previous stage and generate inputs
+for its following stage. Each stage is defined as a PipelineComponent. A stage 
+can generate arbitrary number of outputs given one input. PipelineParcel caches
+these outputs issues to the next stage one at a time. A special signal (EOF)
+will be passed down to all stages when the first stage no long produces any
+further data. After the EOF is dispatched and processed by all stages, the
+pipeline is completed.
 """
 
 class PipelineParcel:
@@ -32,26 +39,47 @@ class PipelineParcel:
     def isEmpty(self):
         return len(self.q) == 0
    
+class PipelineComponent:
+    def next(self, obj):
+        return PipelineParcel()
+    def handleEOF(self):
+        parcel = PipelineParcel()
+        parcel.enqueue(Pipeline.EOF)
+        return parcel
+
 class Pipeline:
+    EOF = [] # use a dummy object as a marker
     """ The pipeline of a number of components
     """
     def __init__(self):
         self.pl = []
     def execute(self):
+        """ Start the pipeline, until the first stage returns no further data
+        """
         first = self.pl[0]
         while True:
             parcel = first.next(None)
+            # if the first stage returns an empty parcel, then we are 
+            # almost done. Just pass down the EOF to every following stage
             if parcel.isEmpty():
+                self._executeSingleStep(1, Pipeline.EOF)
                 break
             while not parcel.isEmpty():
-                obj = parcel.dequeue()
-                self._executeSingleStep(1, obj)
+                self._executeSingleStep(1, parcel.dequeue())
     def _executeSingleStep(self, index, obj):
+        """ Intended for internal use only
+        index specifies which stage
+        """
         if index >= len(self.pl):
             return None
-        parcel = self.pl[index].next(obj)
+        if obj == Pipeline.EOF:
+            parcel = self.pl[index].handleEOF()
+        else:
+            parcel = self.pl[index].next(obj)
         while not parcel.isEmpty():
             nextObj = parcel.dequeue()
             self._executeSingleStep(index+1, nextObj)
     def addStep(self, step):
+        """ Add a step/stage to the pipeline
+        """
         self.pl.append(step)
