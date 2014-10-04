@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # Contributor(s):
 #   Mingyuan Xia
 #
@@ -41,7 +41,7 @@ class LogcatAgent:
     def dump(self, fmt = None, filterTuples = []):
         """ Dump the logcat logs with given filters and formats
         @param fmt: the output format
-        @param filterTuples: a list of (TAG,LEVEL) tuples that specify filtering 
+        @param filterTuples: a list of (TAG,LEVEL) tuples that specify filtering
         according to Android doc, LEVEL could be:
         V - Verbose (lowest priority)
         D - Debug

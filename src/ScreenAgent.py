@@ -1,5 +1,5 @@
 #
-# Copyright 2014 Xinye Lin and others
+# Copyright 2014 Mingyuan Xia and others
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
 # limitations under the License.
 #
 # Contributors:
-#   Ran Shu
+#   Xinye Lin
 #
 
 # Imports the monkeyrunner module used by this program
-from MonkeyHelper import MonkeyRunner
-import SystemStatusAgent
+from MonkeyHelper import EMonkeyDevice
+from SystemStatusAgent import SystemStatusAgent
 
 class ScreenAgent:
 
     def __init__(self,device):
         self.device=device
 
-    #TODO
     def getScreenRotationStatus(self):
         sysAgent=SystemStatusAgent(self.device)
         return sysAgent.getScreenRotationStatus()
@@ -37,7 +36,7 @@ class ScreenAgent:
 
 
 if __name__=='__main__':
-    device=MonkeyRunner.waitForConnection()
+    device=EMonkeyDevice()
     test=ScreenAgent(device)
     print test.getScreenRotationStatus()
     print test.getOrientation()

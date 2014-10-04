@@ -18,12 +18,13 @@
 #
 
 # Imports the monkeyrunner module used by this program
-from MonkeyHelper import MonkeyRunner
+from MonkeyHelper import EMonkeyDevice
 from time import sleep
 from SystemStatusAgent import SystemStatusAgent
 import os
 
 class WifiAgent:
+
 
     def __init__(self,device):
         self.device=device
@@ -65,7 +66,7 @@ class WifiAgent:
             return False
 
 if __name__=='__main__':
-    device=MonkeyRunner.waitForConnection()
+    device=EMonkeyDevice()
     test=WifiAgent(device)
     print test.getWiFiStatus()
     print test.changeWifiStatus()

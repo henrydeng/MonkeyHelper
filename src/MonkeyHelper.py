@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # Contributors:
 #   Mingyuan Xia
 #   Ran Shu
 #
 
-""" MonkeyHelper enriches the monkeyrunner interfaces to easily manipulate 
+""" MonkeyHelper enriches the monkeyrunner interfaces to easily manipulate
 an android box. You need monkeyrunner to run scripts once including this module
 """
 
@@ -35,11 +35,11 @@ def _cmd(cmdlist, mute=True):
 		fnull.close()
 		return (proc.returncode, None)
 	else:
-		proc = subprocess.Popen(cmdlist, stdout = subprocess.PIPE, 
+		proc = subprocess.Popen(cmdlist, stdout = subprocess.PIPE,
 				stderr = subprocess.PIPE)
 		(output, erroutput) = proc.communicate()
 		return (proc.returncode, erroutput + output)
-	
+
 class MonkeyHelper:
 	@staticmethod
 	def aapt(cmdlist, mute = True):
@@ -103,11 +103,11 @@ class EMonkeyDevice:
 	def removePackage(self, package):
 		self.dev.removePackage(package)
 	def shell(self, cmd):
-		return self.dev.shell(cmd)
+		return self.dev.shell(cmd).encode('utf-8')
 	def startActivity(self, uri = None, action = None, data = None,
 					mimetype = None, categories = [], extras = {},
 					component = None, flags = 0):
-		self.dev.startActivity(uri, action, data, mimetype, categories, 
+		self.dev.startActivity(uri, action, data, mimetype, categories,
 							extras,	component, flags)
 	def takeSnapshot(self):
 		return self.dev.takeSnapshot()
@@ -154,4 +154,4 @@ class EMonkeyDevice:
 		return self.shell("pull %s %s" % (devicePath, localPath))
 	def getSystemInfo(self):
 		return {"android_version": self.getProperty("build.version.release")}
-	
+

@@ -1,5 +1,5 @@
 #
-# Copyright 2014 Xinye Lin and others
+# Copyright 2014 Mingyuan Xia and others
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 # Contributors:
-#   Ran Shu
+#   Xinye Lin
 #
 
 # Imports the monkeyrunner module used by this program
-from MonkeyHelper import MonkeyRunner
+from MonkeyHelper import EMonkeyDevice
 import re
 
 class SystemStatusAgent:
@@ -113,7 +113,7 @@ class SystemStatusAgent:
             return False
 
 if __name__=='__main__':
-    device=MonkeyRunner.waitForConnection()
+    device=EMonkeyDevice()
     test=SystemStatusAgent(device)
     print test.getWifiStatus()
     print test.getCellularDataStatus()
