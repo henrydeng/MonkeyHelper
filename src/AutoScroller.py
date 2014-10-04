@@ -34,7 +34,7 @@ import TraceManipulation as dtm
 from MonkeyHelper import EMonkeyDevice
 import subprocess, signal
 
-class LiveGeteventReader:
+class LiveGeteventReader(PipelineComponent):
     def __init__(self):
         cmd = '/Applications/android-sdk-macosx/platform-tools/adb shell getevent -lt /dev/input/event1'
         self.p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -52,7 +52,7 @@ class LiveGeteventReader:
         # has to do this, with a process leak
         self.mustTerminate = True
 
-class AutoScrollingLearner:
+class AutoScrollingLearner(PipelineComponent):
     def __init__(self, reader, sample_count):
         self.reader = reader
         self.sample_count = sample_count

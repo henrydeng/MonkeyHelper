@@ -22,9 +22,9 @@
 via MonkeyHelper interfaces.
 """
 from MonkeyHelper import EMonkeyDevice
-from Pipeline import PipelineParcel
+from Pipeline import PipelineParcel, PipelineComponent
 
-class MonkeyHelperReplayer:
+class MonkeyHelperReplayer(PipelineComponent):
     """ Replay finger trails to an Android box via MonkeyHelper interfaces
     """
     def __init__(self): 
