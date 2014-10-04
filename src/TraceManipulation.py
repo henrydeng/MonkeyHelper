@@ -289,16 +289,14 @@ class TimeScaler(PipelineComponent):
         return parcel
     
 class RelativeTimingConverter(PipelineComponent):
-    """
+    """ Convert all timestamp based on the first one in the trace
     """
     baseTimestamp = None
     def next(self, listMotionEvents):
         if self.baseTimestamp is None:
             self.baseTimestamp = listMotionEvents[0].timestamp
-            print self.baseTimestamp
         for e in listMotionEvents:
             e.timestamp -= self.baseTimestamp
-            print e.timestamp
         parcel = PipelineParcel()
         parcel.enqueue(listMotionEvents)
         return parcel
