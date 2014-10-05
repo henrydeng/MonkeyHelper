@@ -29,14 +29,14 @@ def module_path():
     return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
 sys.path.append(module_path())
 
-from Pipeline import Pipeline, PipelineParcel
+from Pipeline import Pipeline, PipelineParcel, PipelineComponent
 import TraceManipulation as dtm
 from MonkeyHelper import EMonkeyDevice
 import subprocess, signal
 
 class LiveGeteventReader(PipelineComponent):
     def __init__(self):
-        cmd = '/Applications/android-sdk-macosx/platform-tools/adb shell getevent -lt /dev/input/event1'
+        cmd = 'adb shell getevent -lt /dev/input/event1'
         self.p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         self.mustTerminate = False
     def next(self, dummy):
