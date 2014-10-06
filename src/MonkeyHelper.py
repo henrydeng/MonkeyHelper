@@ -70,7 +70,6 @@ class MonkeyHelper:
 
 
 class EMonkeyDevice:
-<<<<<<< HEAD
     """ An enriched MonkeyDevice
     """
     DOWN_AND_UP = MonkeyDevice.DOWN_AND_UP
@@ -277,4 +276,3 @@ class EMonkeyDevice:
 	def getSystemInfo(self):
 		return {"android_version": self.getProperty("build.version.release")}
 
->>>>>>> ab407aa1cdaab598a38affb29ecc68b0b770ade9
