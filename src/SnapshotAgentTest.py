@@ -1,8 +1,8 @@
-from SnapshortAgent import SnapshortAgent
+from SnapshotAgent import SnapshotAgent
 
 def main():
     print "working"
-    tools=SnapshortAgent()
+    tools=SnapshotAgent()
     print "working 2"
     savedImage=tools.takeSnapshot()
     tools.saveSnapshot(savedImage, 'tempPic')

@@ -14,34 +14,40 @@
 # limitations under the License.
 # 
 # Contributors:
+#   Mingyuan Xia
 #   Ran Shu
 #
 
-# Imports the monkeyrunner module used by this program
-from MonkeyHelper import EMonkeyDevice
-
-class SnapshortAgent :
-    def __init__(self):
-        self.device = EMonkeyDevice()
+class SnapshotAgent :
+    def __init__(self, device):
+        self.device = device
         
     def takeSnapshot(self):
-        snapshot=self.device.takeSnapshot()
-        return snapshot
+        ''' Return a snapshot object
+        '''
+        return self.device.takeSnapshot()
     
     def saveSnapshot(self, snapshot, fileName):
-        snapshot.writeToFile(fileName+'.png','png')
+        ''' Save a snapshot object to a png file
+        '''
+        snapshot.writeToFile(fileName,'png')
         
-    def compareSnapshots (self, snapshot1, snapshot2):
+    def compareSnapshots(self, snapshot1, snapshot2):
+        ''' Check if two snapshot objects are the same
+        '''
         return snapshot1.sameAs(snapshot2, 1)
 
     def takeAndCompareSnapshots(self, snapshotCheck):
-        currentSnapshot=self.device.takeSnapshot()
-        return self.compareSnapshots(currentSnapshot, snapshotCheck)
+        ''' Take a snapshot and check if it is the same as another one
+        '''
+        return self.compareSnapshots(self.takeSnapshot(), snapshotCheck)
         
-    def getSubSnapshot (self, snapshot, coordinates):
-        subsnapshot=snapshot.getSubImage(coordinates)
-        return subsnapshot
+    def getSubSnapshot(self, snapshot, coordinates):
+        ''' Get a region from a snapshort
+        '''
+        return snapshot.getSubImage(coordinates)
     
     def loadSnapshot (self, fileName):
-        snapshot = self.device.loadImageFromFile(fileName)
-        return snapshot
+        ''' Load a snapshot object from a png file
+        '''
+        return self.device.loadImageFromFile(fileName)
