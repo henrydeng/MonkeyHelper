@@ -1,9 +1,13 @@
-from SnapshortAgent import SnapshortAgent
+from SnapshotAgent import SnapshotAgent
 
 
 def main():
     print "working"
+<<<<<<< HEAD:src/SnapshortAgentTest.py
     tools = SnapshortAgent()
+=======
+    tools=SnapshotAgent()
+>>>>>>> 9aed59fd8b5cd2aeda8ad502056ddf7a3e23575e:src/SnapshotAgentTest.py
     print "working 2"
     savedImage = tools.takeSnapshot()
     tools.saveSnapshot(savedImage, 'tempPic')
