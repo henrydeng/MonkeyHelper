@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,20 +21,20 @@
 from MonkeyHelper import EMonkeyDevice
 import re
 
-class SystemStatusAgent:
 
-    def __init__(self,device):
-        self.device=device
+class SystemStatusAgent:
+    def __init__(self, device):
+        self.device = device
 
     def getWifiStatus(self):
         """Possible status:
            disabled | connected | enabled | disconnected
         """
-        msg=self.device.shell("dumpsys wifi").encode('utf-8')
-        pat=re.compile(r'^Wi-Fi is (\w*)')
+        msg = self.device.shell("dumpsys wifi").encode('utf-8')
+        pat = re.compile(r'^Wi-Fi is (\w*)')
         try:
-            status=pat.findall(msg)[0]
-            if status!="":
+            status = pat.findall(msg)[0]
+            if status != "":
                 return status
             else:
                 raise Exception()
@@ -47,13 +47,14 @@ class SystemStatusAgent:
             0 - DATA_DISCONNECTED (Disconnected. IP traffic not available. )
             1 - DATA_CONNECTING(Currently setting up a data connection.)
             2 - DATA_CONNECTED (Connected. IP traffic should be available.)
-            3 - DATA_SUSPENDED (Suspended. The connection is up, but IP traffic is temporarily unavailable. For example, in a 2G network, data activity may be suspended when a voice call arrives.)
+            3 - DATA_SUSPENDED (Suspended. The connection is up, but IP traffic is temporarily unavailable.
+                For example, in a 2G network, data activity may be suspended when a voice call arrives.)
         """
-        msg=self.device.shell('dumpsys telephony.registry').encode('utf-8')
-        pat=re.compile(r'mDataConnectionState=([0-3])')
+        msg = self.device.shell('dumpsys telephony.registry').encode('utf-8')
+        pat = re.compile(r'mDataConnectionState=([0-3])')
         try:
-            status=pat.findall(msg)[0]
-            if status in ['0','1','2','3']:
+            status = pat.findall(msg)[0]
+            if status in ['0', '1', '2', '3']:
                 return status
             else:
                 raise Exception()
@@ -66,11 +67,11 @@ class SystemStatusAgent:
            1 - Rotation locked
            0 - Auto Rotation
         """
-        msg=self.device.shell('dumpsys window').encode('utf-8')
-        pat=re.compile(r'mUserRotationMode=([01])')
+        msg = self.device.shell('dumpsys window').encode('utf-8')
+        pat = re.compile(r'mUserRotationMode=([01])')
         try:
-            status=pat.findall(msg)[0]
-            if status in ['0','1']:
+            status = pat.findall(msg)[0]
+            if status in ['0', '1']:
                 return status
             else:
                 raise Exception()
@@ -85,11 +86,11 @@ class SystemStatusAgent:
            2 - portrait (upside down)
            3 - landscape (right side down)
         """
-        msg=self.device.shell('dumpsys display').encode('utf-8')
-        pat=re.compile(r'mCurrentOrientation=([0-3])')
+        msg = self.device.shell('dumpsys display').encode('utf-8')
+        pat = re.compile(r'mCurrentOrientation=([0-3])')
         try:
-            status=pat.findall(msg)[0]
-            if status in ['0','1','2','3']:
+            status = pat.findall(msg)[0]
+            if status in ['0', '1', '2', '3']:
                 return status
             else:
                 raise Exception()
@@ -100,11 +101,11 @@ class SystemStatusAgent:
     def getBatteryLevel(self):
         """return the remaining percentage of battery
         """
-        msg=self.device.shell('dumpsys battery').encode('utf-8')
-        pat=re.compile(r'level: (\d*)')
+        msg = self.device.shell('dumpsys battery').encode('utf-8')
+        pat = re.compile(r'level: (\d*)')
         try:
-            status=pat.findall(msg)[0]
-            if 0<=int(status)<=100 :
+            status = pat.findall(msg)[0]
+            if 0 <= int(status) <= 100:
                 return status
             else:
                 raise Exception()
@@ -112,9 +113,10 @@ class SystemStatusAgent:
             print "Fail to acquire the battery level!"
             return False
 
-if __name__=='__main__':
-    device=EMonkeyDevice()
-    test=SystemStatusAgent(device)
+
+if __name__ == '__main__':
+    device = EMonkeyDevice()
+    test = SystemStatusAgent(device)
     print test.getWifiStatus()
     print test.getCellularDataStatus()
     print test.getOrientation()

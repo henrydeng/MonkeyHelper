@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,15 +23,20 @@ the app being tested.
 """
 
 import os, sys, inspect
+
+
 def module_path():
     ''' returns the module path without the use of __file__.
     from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
     return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+
+
 sys.path.append(module_path())
 
 import MonkeyHelper as mh
 import LogcatAgent as la
 import time
+
 
 def main():
     """ This test launches a series of apps (with given package and main activity names)
@@ -54,8 +59,9 @@ def main():
         for p in packages:
             device.startActivity(component=p)
             time.sleep(sleep_interval)
-    err = agent.dump(fmt = None, filterTuples = [(app_tag, 'E'), ('*', 'S')])
+    err = agent.dump(fmt=None, filterTuples=[(app_tag, 'E'), ('*', 'S')])
     print 'Finishing test, dumping error messages:'
     print err
+
 
 main()

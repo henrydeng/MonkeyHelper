@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,32 +27,42 @@ further data. After the EOF is dispatched and processed by all stages, the
 pipeline is completed.
 """
 
+
 class PipelineParcel:
     """ The parcel exchanged between different steps of a pipeline
     """
+
     def __init__(self):
         self.q = []
+
     def enqueue(self, obj):
         self.q.append(obj)
+
     def dequeue(self):
         return self.q.pop(0)
+
     def isEmpty(self):
         return len(self.q) == 0
-   
+
+
 class PipelineComponent:
     def next(self, obj):
         return PipelineParcel()
+
     def handleEOF(self):
         parcel = PipelineParcel()
         parcel.enqueue(Pipeline.EOF)
         return parcel
 
+
 class Pipeline:
-    EOF = [] # use a dummy object as a marker
+    EOF = []  # use a dummy object as a marker
     """ The pipeline of a number of components
     """
+
     def __init__(self):
         self.pl = []
+
     def execute(self):
         """ Start the pipeline, until the first stage returns no further data
         """
@@ -66,6 +76,7 @@ class Pipeline:
                 break
             while not parcel.isEmpty():
                 self._executeSingleStep(1, parcel.dequeue())
+
     def _executeSingleStep(self, index, obj):
         """ Intended for internal use only
         index specifies which stage
@@ -78,7 +89,8 @@ class Pipeline:
             parcel = self.pl[index].next(obj)
         while not parcel.isEmpty():
             nextObj = parcel.dequeue()
-            self._executeSingleStep(index+1, nextObj)
+            self._executeSingleStep(index + 1, nextObj)
+
     def addStep(self, step):
         """ Add a step/stage to the pipeline
         """

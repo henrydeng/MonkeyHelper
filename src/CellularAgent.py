@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Contributors:
-#   Xinye Lin
+# Xinye Lin
 #
 
 # Imports the monkeyrunner module used by this program
@@ -23,10 +23,10 @@ from time import sleep
 from SystemStatusAgent import SystemStatusAgent
 import os
 
-class CellularAgent:
 
-    def __init__(self,device):
-        self.device=device
+class CellularAgent:
+    def __init__(self, device):
+        self.device = device
 
     def turnOnCellularData(self):
         """ Need root access
@@ -50,21 +50,22 @@ class CellularAgent:
             return False
 
     def getCellularDataStatus(self):
-        sysAgent=SystemStatusAgent(self.device)
+        sysAgent = SystemStatusAgent(self.device)
         return sysAgent.getCellularDataStatus()
 
     def changeCellularDataStatus(self):
-        if self.getCellularDataStatus()=='2':
+        if self.getCellularDataStatus() == '2':
             return self.turnOffCellularData()
-        elif self.getCellularDataStatus()=='0':
+        elif self.getCellularDataStatus() == '0':
             return self.turnOnCellularData()
         else:
             print "Cellular Data status unchangable for now."
             return False
 
-if __name__=='__main__':
-    device=EMonkeyDevice()
-    test=CellularAgent(device)
+
+if __name__ == '__main__':
+    device = EMonkeyDevice()
+    test = CellularAgent(device)
     print test.getCellularDataStatus()
     print test.changeCellularDataStatus()
     sleep(5)

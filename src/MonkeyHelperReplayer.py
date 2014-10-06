@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,12 +24,15 @@ via MonkeyHelper interfaces.
 from MonkeyHelper import EMonkeyDevice
 from Pipeline import PipelineParcel, PipelineComponent
 
+
 class MonkeyHelperReplayer(PipelineComponent):
     """ Replay finger trails to an Android box via MonkeyHelper interfaces
     """
-    def __init__(self): 
+
+    def __init__(self):
         self.device = EMonkeyDevice()
         self.lastTimeStamp = 0
+
     def next(self, trail):
         """ Takes a finger trail and produces nothing
         """

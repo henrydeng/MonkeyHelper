@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,36 +22,30 @@ from MonkeyHelper import EMonkeyDevice
 import random
 from WifiAgent import WifiAgent
 from CellularAgent import CellularAgent
-import subprocess
 from LogcatAgent import LogcatAgent
 
-class HeisenbugTester:
 
-    def __init__(self,device,package,seed=11,number=10):
-        self.device=device
-        self.seed=seed
-        self.number=number
-        self.package=package
-        self.logcat=LogcatAgent(self.device)
+class HeisenbugTester:
+    def __init__(self, device, package, seed=11, number=10):
+        self.device = device
+        self.seed = seed
+        self.number = number
+        self.package = package
+        self.logcat = LogcatAgent(self.device)
         #TODO add orientation and other events
-        self.specialEvents=['wifi','data']
+        self.specialEvents = ['wifi', 'data']
         random.seed(self.seed)
 
     def generateSpecialEventSequence(self):
-        length=len(self.specialEvents)
-        seq=self.specialEvents*(self.number/length)
-        length=len(seq)
-        if length<self.number:
-            seq=seq+seq[0:self.number-length]
-        elif length>self.number:
-            seq=seq[0:self.number]
-        seq=random.sample(seq,self.number)
+        length = len(self.specialEvents)
+        seq = self.specialEvents * (self.number/length+1)
+        seq = random.sample(seq, self.number)
         return seq
 
-    def processSpecialEvents(self,specialEvent):
-        if specialEvent=='wifi':
+    def processSpecialEvents(self, specialEvent):
+        if specialEvent == 'wifi':
             WifiAgent(self.device).changeWifiStatus()
-        elif specialEvent=='data':
+        elif specialEvent == 'data':
             CellularAgent(self.device).changeCellularDataStatus()
 
 
@@ -60,10 +54,10 @@ class HeisenbugTester:
            and self.number pieces of random simple events in between of any two continuous special events
         """
         try:
-            specialSeq=self.generateSpecialEventSequence()
+            specialSeq = self.generateSpecialEventSequence()
             for i in specialSeq:
                 self.processSpecialEvents(i)
-                self.device.shell('monkey -p '+self.package+' -vvv '+str(self.number))
+                self.device.shell('monkey -p ' + self.package + ' -vvv ' + str(self.number))
             return True
         except:
             return False
@@ -72,7 +66,7 @@ class HeisenbugTester:
         """run self.number random simple events
         """
         try:
-            self.device.shell('monkey -p '+self.package+' -vvv '+str(self.number))
+            self.device.shell('monkey -p ' + self.package + ' -vvv ' + str(self.number))
             return True
         except:
             return False
@@ -81,7 +75,7 @@ class HeisenbugTester:
         """run self.number pieces of random special events
         """
         try:
-            specialSeq=self.generateSpecialEventSequence()
+            specialSeq = self.generateSpecialEventSequence()
             for i in specialSeq:
                 self.processSpecialEvents(i)
             return True
@@ -89,9 +83,9 @@ class HeisenbugTester:
             return False
 
     def dumpLog(self):
-        log=self.logcat.dump(filterTuples=[('*','W')])
-        log=log.split('\n')
-        result=[]
+        log = self.logcat.dump(filterTuples=[('*', 'W')])
+        log = log.split('\n')
+        result = []
         for line in log:
             if self.package in line:
                 result.append(line)
@@ -101,22 +95,23 @@ class HeisenbugTester:
     def clearLog(self):
         return self.logcat.clear()
 
-    def runner(self,type='mix'):
+    def runner(self, type='mix'):
         #log=open('HeissenbugTesterlog.txt', 'w')
         #logcat=subprocess.Popen(['adb','logcat', '*:W', '|', 'grep', self.package], stdout=log)
         self.clearLog()
-        if type=='mix':
-            result=self.runnerMixEvents()
-        elif type=='special':
-            result=self.runnerSpecialEvents()
-        elif type=='simple':
-            result=self.runnerSimpleEvents()
-        return result,self.dumpLog()
+        if type == 'mix':
+            result = self.runnerMixEvents()
+        elif type == 'special':
+            result = self.runnerSpecialEvents()
+        elif type == 'simple':
+            result = self.runnerSimpleEvents()
+        return result, self.dumpLog()
 
-if __name__=='__main__':
-    device=EMonkeyDevice()
-    test=HeisenbugTester(device,package='com.android.gallery3d')
-    result,log=test.runner()
+
+if __name__ == '__main__':
+    device = EMonkeyDevice()
+    test = HeisenbugTester(device, package='com.android.gallery3d')
+    result, log = test.runner()
     print log
 
 

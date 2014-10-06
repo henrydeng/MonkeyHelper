@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,23 +22,28 @@ class LogcatAgent:
     EVENTS = 'events'
     RADIO = 'radio'
     """ LogcatAgent controls logcat, the logging facility of Android"""
+
     def __init__(self, device):
         """ Initialize the agent with a given device
         @param device: should be an EMonkeyDevice
         """
         self.device = device
+
     def logcat(self, args):
         """ Send a raw logcat command and return its output"""
         s = "logcat"
         for arg in args:
             s += ' ' + arg
         return self.device.shell(s).encode('utf-8')
+
     def clear(self):
         """ Clear the logcat logs"""
         self.logcat(['-c'])
-    def dumpBuf(self, buf = MAIN):
+
+    def dumpBuf(self, buf=MAIN):
         return self.logcat(['-b ', buf])
-    def dump(self, fmt = None, filterTuples = []):
+
+    def dump(self, fmt=None, filterTuples=[]):
         """ Dump the logcat logs with given filters and formats
         @param fmt: the output format
         @param filterTuples: a list of (TAG,LEVEL) tuples that specify filtering

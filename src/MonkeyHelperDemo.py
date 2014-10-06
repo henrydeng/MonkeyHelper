@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,14 +21,18 @@
 """
 
 import os, sys, inspect
+
+
 def module_path():
     ''' returns the module path without the use of __file__.
     from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
     return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+
+
 sys.path.append(module_path())
 
 # The MonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
-from MonkeyHelper import EMonkeyDevice 
+from MonkeyHelper import EMonkeyDevice
 
 # starting the application and test
 print "Starting the demo"

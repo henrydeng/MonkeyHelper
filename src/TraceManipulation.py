@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ collected from Android devices.
 import re, sys
 from Pipeline import PipelineParcel, PipelineComponent
 
+
 class MotionEvent:
     """ This data structure describes a single evdev report
     """
@@ -34,10 +35,13 @@ class MotionEvent:
     x = 0
     y = 0
     pressure = 0
+
     def __str__(self):
         return str((self.timestamp, self.tracking_id, self.touch_major, self.x, self.y, self.pressure))
+
     def __repr__(self):
         return self.__str__()
+
     def clone(self):
         s = MotionEvent()
         s.timestamp = self.timestamp
@@ -48,6 +52,7 @@ class MotionEvent:
         s.pressure = self.pressure
         return s
 
+
 class GeteventCommand:
     """ This data structure describes a single command from Android getevent utility
     """
@@ -55,8 +60,10 @@ class GeteventCommand:
     evType = ""
     evCmd = ""
     evVal = 0
+
     def __str__(self):
         return str((self.timestamp, self.evType, self.evCmd, self.evVal))
+
 
 # the doc for the MT protocol can be found here:
 # https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
@@ -64,11 +71,13 @@ class GeteventCommand:
 class MultiTouchTypeAParser(PipelineComponent):
     """ A type-A multi-touch evdev device
     """
-    NAVIGATION_HEIGHT = 48 # the height of the standard navigation bar at the bottom, in pixels
+    NAVIGATION_HEIGHT = 48  # the height of the standard navigation bar at the bottom, in pixels
+
     def __init__(self):
         self.currentSlot = MotionEvent()
         self.listMotions = []
-        self.dontReport = False # one-shot disabler
+        self.dontReport = False  # one-shot disabler
+
     def next(self, geteventCmd):
         """ Take a stream of getevent commands and produce motion events
         """
@@ -119,7 +128,8 @@ class MultiTouchTypeAParser(PipelineComponent):
         else:
             print "[WARN] Type A MT skips unknown line:" + str(geteventCmd)
         return parcel
-        
+
+
 class MultiTouchTypeBParser(PipelineComponent):
     """ A type-B multi-touch screen
     a list of supported features:
@@ -128,12 +138,14 @@ class MultiTouchTypeBParser(PipelineComponent):
     ABS_MT_TOUCH_MINOR, ABS_MT_WIDTH_MAJOR, ABS_MT_WIDTH_MINOR, ABS_MT_DISTANCE
     ABS_MT_ORIENTATION, ABS_MT_TOOL_X, ABS_MT_TOOL_Y
     """
-    NAVIGATION_HEIGHT = 48 # the standard navigation bar at the bottom
+    NAVIGATION_HEIGHT = 48  # the standard navigation bar at the bottom
+
     def __init__(self):
         # states
         self.currentSlotIndex = 0
         self.currentSlot = MotionEvent()
         self.slots = [self.currentSlot]
+
     def next(self, geteventCmd):
         """ Takes a stream of getevent commands and produce motion events
         """
@@ -142,7 +154,7 @@ class MultiTouchTypeBParser(PipelineComponent):
             if geteventCmd.evCmd == "ABS_MT_SLOT":
                 self.currentSlotIndex = geteventCmd.evVal
                 if geteventCmd.evVal >= len(self.slots):
-                    self.slots.extend([None]*(geteventCmd.evVal + 1 - len(self.slots)))
+                    self.slots.extend([None] * (geteventCmd.evVal + 1 - len(self.slots)))
                     self.slots[geteventCmd.evVal] = MotionEvent()
                 self.currentSlot = self.slots[self.currentSlotIndex]
             elif geteventCmd.evCmd == "ABS_MT_POSITION_X":
@@ -174,20 +186,25 @@ class MultiTouchTypeBParser(PipelineComponent):
             print "[WARN] Type B MT skips unknown line:" + str(geteventCmd)
         return parcel
 
+
 class GenericPrinter(PipelineComponent):
     """ A generic printer, print whatever given
     """
+
     def next(self, whatever):
         """ Takes whatever object and print its string representation
         """
         print str(whatever)
         return PipelineParcel()
 
+
 class TextFileLineReader(PipelineComponent):
     """ A text file reader which reads the file line by line
     """
+
     def __init__(self, tracePath):
         self.fp = open(tracePath)
+
     def next(self, dummy):
         """ Takes nothing and produces lines from the file
         """
@@ -195,13 +212,16 @@ class TextFileLineReader(PipelineComponent):
         line = self.fp.readline()
         if line != "":
             parcel.enqueue(line)
-        return parcel        
+        return parcel
+
 
 class RawTraceParser(PipelineComponent):
     """ A trace parser for raw getevent traces
     """
+
     def __init__(self):
         self.pattern = re.compile("\\[\s*(\d+\.\d+)\\]\s*(\w+)\s*(\w+)\s*(\w+)")
+
     def next(self, line):
         """ Takes a single line of the raw trace and produces a getevent command object
         a line is in the format of:
@@ -218,7 +238,7 @@ class RawTraceParser(PipelineComponent):
         e.evType = m.group(2)
         e.evCmd = m.group(3)
         if m.group(4) == "DOWN":
-            e.evVal = 1 # TODO special cases for BTN_TOUCH
+            e.evVal = 1  # TODO special cases for BTN_TOUCH
         elif m.group(4) == "UP":
             e.evVal = 0
         else:
@@ -227,11 +247,14 @@ class RawTraceParser(PipelineComponent):
         parcel.enqueue(e)
         return parcel
 
+
 class FingerDecomposer(PipelineComponent):
     """ Decompose motion event stream into finger trails
     """
+
     def __init__(self):
         self.tracker = {}
+
     def next(self, listMotionEvents):
         """ Takes a list of motion events and produces finger trails
         """
@@ -251,20 +274,24 @@ class FingerDecomposer(PipelineComponent):
             parcel.enqueue(trail)
         return parcel
 
+
 class TrailScaler(PipelineComponent):
     """ Scale the coordinates of the motion events in the trail
     Used to adapt the trail from one device to another with a different resolution
     """
+
     def __init__(self, xfactor, yfactor):
         self.xfactor = xfactor
         self.yfactor = yfactor
+
     def scaleXY(self, motionEvent):
         tempXValue = float(motionEvent.x)
         tempYValue = float(motionEvent.y)
-        tempXValue = int((tempXValue * self.xfactor)+0.5)
-        tempYValue = int((tempYValue * self.yfactor)+0.5)
+        tempXValue = int((tempXValue * self.xfactor) + 0.5)
+        tempYValue = int((tempYValue * self.yfactor) + 0.5)
         motionEvent.x = tempXValue
         motionEvent.y = tempYValue
+
     def next(self, trail):
         """ Takes a trail and produces a scaled trail with given factors
         """
@@ -274,11 +301,14 @@ class TrailScaler(PipelineComponent):
         parcel.enqueue(trail)
         return parcel
 
+
 class TimeScaler(PipelineComponent):
     """ Scale the time of a trail, e.g. accelerate/decelerate the replaying
     """
+
     def __init__(self, factor):
         self.factor = factor
+
     def next(self, trail):
         """ Takes a trail and produces a time-scaled trail
         """
@@ -287,11 +317,13 @@ class TimeScaler(PipelineComponent):
         parcel = PipelineParcel()
         parcel.enqueue(trail)
         return parcel
-    
+
+
 class RelativeTimingConverter(PipelineComponent):
     """ Convert all timestamp based on the first one in the trace
     """
     baseTimestamp = None
+
     def next(self, listMotionEvents):
         if self.baseTimestamp is None:
             self.baseTimestamp = listMotionEvents[0].timestamp

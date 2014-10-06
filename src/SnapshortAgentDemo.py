@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,8 +26,8 @@ If taking a screenshot, use this block of code and comment out line 25
 monkeyImage1=device.takeSnapshot()
 monkeyImage1.writeToFile('screen_shot1.png','png')
 """
-monkeyImage1=MonkeyRunner.loadImageFromFile('screen_shot1.png')
-monkeyImage2=MonkeyRunner.loadImageFromFile('screen_shot2.png')
+monkeyImage1 = MonkeyRunner.loadImageFromFile('screen_shot1.png')
+monkeyImage2 = MonkeyRunner.loadImageFromFile('screen_shot2.png')
 #Comparing an image with itself
 if monkeyImage1.sameAs(monkeyImage1, 1):
     print "1st Test: match"
@@ -45,9 +45,9 @@ else:
     print "3rd Test: not a match"
 
 #Trying to match subImages
-subimage1=monkeyImage1.getSubImage((110,100,260,100))
+subimage1 = monkeyImage1.getSubImage((110, 100, 260, 100))
 subimage1.writeToFile('subimage1.png', 'png')
-subimage2=monkeyImage2.getSubImage((110,100,260,100))
+subimage2 = monkeyImage2.getSubImage((110, 100, 260, 100))
 subimage2.writeToFile('subimage2.png', 'png')
 
 if subimage1.sameAs(subimage2, 0.8):

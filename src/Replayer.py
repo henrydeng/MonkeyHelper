@@ -5,14 +5,14 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# 
+#
 # Contributors:
 #   Mingyuan Xia
 #
@@ -23,15 +23,22 @@ monkeyrunner to run scripts once including this module
 """
 
 import os, sys, inspect
+
+
 def module_path():
     ''' returns the module path without the use of __file__.
     from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
     return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+
+
 sys.path.append(module_path())
 
 from Pipeline import Pipeline
 import TraceManipulation as dtm
 from MonkeyHelperReplayer import MonkeyHelperReplayer
+from HeisenbugReplayer import HeisenbugReplayer
+from HeisenbugInjecter import HeisenbugInjecter
+
 
 def main():
     if len(sys.argv) <= 1:
@@ -49,9 +56,15 @@ def main():
     # pl.addStep(dtm.TrailScaler(0.8,0.8))
     # pl.addStep(dtm.TimeScaler(0.25))
     pl.addStep(MonkeyHelperReplayer())
+    # if you are testing Heisenbug, replace the upper line
+    # with the following two lines
+    #pl.addStep(HeisenbugInjecter())
+    #pl.addStep(HeisenbugReplayer())
+    #
     # pl.addStep(dtm.GenericPrinter())
     pl.execute()
     print "Replay finished"
-        
+
+
 if __name__ == "__main__":
     main()
