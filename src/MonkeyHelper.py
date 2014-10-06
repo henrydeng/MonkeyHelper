@@ -77,8 +77,8 @@ class EMonkeyDevice:
     UP = MonkeyDevice.UP
     MOVE = MonkeyDevice.MOVE
 
-    def __init__(self):
-        self.dev = MonkeyRunner.waitForConnection()
+    def __init__(self, timeout = 20):
+        self.dev = MonkeyRunner.waitForConnection(timeout)
         self.displayWidth = int(self.getProperty("display.width"))
         self.displayHeight = int(self.getProperty("display.height"))
 

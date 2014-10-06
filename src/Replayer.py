@@ -55,11 +55,11 @@ def main():
     # this step might be necessary for a tablet
     # pl.addStep(dtm.TrailScaler(0.8,0.8))
     # pl.addStep(dtm.TimeScaler(0.25))
-    pl.addStep(MonkeyHelperReplayer())
+    # pl.addStep(MonkeyHelperReplayer())
     # if you are testing Heisenbug, replace the upper line
     # with the following two lines
-    #pl.addStep(HeisenbugInjecter())
-    #pl.addStep(HeisenbugReplayer())
+    pl.addStep(HeisenbugInjecter())
+    pl.addStep(HeisenbugReplayer())
     #
     # pl.addStep(dtm.GenericPrinter())
     pl.execute()
