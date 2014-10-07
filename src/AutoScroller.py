@@ -36,7 +36,7 @@ sys.path.append(module_path())
 from Pipeline import Pipeline, PipelineParcel, PipelineComponent
 import TraceManipulation as dtm
 from MonkeyHelper import EMonkeyDevice
-import subprocess, signal
+import subprocess
 
 
 class LiveGeteventReader(PipelineComponent):
