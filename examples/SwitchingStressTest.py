@@ -32,9 +32,10 @@ def module_path():
 
 
 sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
 
-import MonkeyHelper as mh
-import LogcatAgent as la
+from MonkeyHelper import EMonkeyDevice
+from Agents import LogcatAgent
 import time
 
 
@@ -51,8 +52,8 @@ def main():
     sleep_interval = 2
     repeats = 2
     app_tag = 'ActivityManager'
-    device = mh.EMonkeyDevice()
-    agent = la.LogcatAgent(device)
+    device = EMonkeyDevice()
+    agent = LogcatAgent(device)
     agent.clear()
     print 'Start launching stress test'
     for _ in range(repeats):

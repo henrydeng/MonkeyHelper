@@ -30,6 +30,7 @@ def module_path():
 
 
 sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
 
 # The MonkeyHelper module is in the same folder but monkeyrunner launcher needs to know
 from MonkeyHelper import EMonkeyDevice

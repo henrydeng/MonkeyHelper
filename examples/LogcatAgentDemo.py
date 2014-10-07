@@ -31,19 +31,19 @@ def module_path():
 
 
 sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
 
-import MonkeyHelper as mh
-import LogcatAgent as la
+from MonkeyHelper import EMonkeyDevice
+from Agents import LogcatAgent
 import time
-
 
 def main():
     """ This example dumps all error messages in logcat and then clear it.
     After 5 seconds, it dumps all messages and finishes.
     Note that logcat encodes its output with utf-8
     """
-    device = mh.EMonkeyDevice()
-    agent = la.LogcatAgent(device)
+    device = EMonkeyDevice()
+    agent = LogcatAgent(device)
     print agent.dump(fmt=None, filterTuples=[('*', 'E')])
     agent.clear()
     print 'Waiting for 5 seconds...'

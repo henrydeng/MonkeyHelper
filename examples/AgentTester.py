@@ -31,6 +31,7 @@ def module_path():
 
 
 sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
 
 from Agents import CellularAgent, ScreenAgent, SystemStatusAgent, WifiAgent
 from MonkeyHelper import EMonkeyDevice

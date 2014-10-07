@@ -32,6 +32,7 @@ def module_path():
 
 
 sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
 
 from Pipeline import Pipeline
 import TraceManipulation as dtm

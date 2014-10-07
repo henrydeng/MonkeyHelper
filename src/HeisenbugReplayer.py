@@ -19,8 +19,7 @@
 from MonkeyHelperReplayer import MonkeyHelperReplayer
 from Pipeline import PipelineParcel, PipelineComponent
 from HeisenbugInjector import SpecialEvent
-from WifiAgent import WifiAgent
-from Agents import CellularAgent
+from Agents import CellularAgent, WifiAgent
 
 
 class HeisenbugReplayer(PipelineComponent):
