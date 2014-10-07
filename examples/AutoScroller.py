@@ -69,13 +69,13 @@ class AutoScrollingLearner(PipelineComponent):
         self.lastTimestamp = 0
         self.stats = None
 
-    def next(self, trail):
-        pointCount = len(trail)
-        duration = trail[len(trail) - 1].timestamp - trail[0].timestamp
-        xdelta = trail[len(trail) - 1].x - trail[0].x
-        ydelta = trail[len(trail) - 1].y - trail[0].y
-        waitTime = trail[0].timestamp - self.lastTimestamp
-        self.lastTimestamp = trail[len(trail) - 1].timestamp
+    def next(self, specialEvent):
+        pointCount = len(specialEvent)
+        duration = specialEvent[len(specialEvent) - 1].timestamp - specialEvent[0].timestamp
+        xdelta = specialEvent[len(specialEvent) - 1].x - specialEvent[0].x
+        ydelta = specialEvent[len(specialEvent) - 1].y - specialEvent[0].y
+        waitTime = specialEvent[0].timestamp - self.lastTimestamp
+        self.lastTimestamp = specialEvent[len(specialEvent) - 1].timestamp
         sample = (waitTime, xdelta, ydelta, duration, pointCount)
         self.samples.append(sample)
         print sample

@@ -23,23 +23,16 @@ This module provides a component to inject hesenbugs into the replay trace
 
 import random
 from Pipeline import PipelineParcel, PipelineComponent
-from MonkeyHelper import MonkeyHelperReplayer
 from Agents import CellularAgent, WifiAgent
+from Replayer import Replayer, ReplayEvent
 
-
-class SpecialEvent:
+class SpecialEvent(ReplayEvent):
     def __init__(self, name, timestamp):
+        ReplayEvent.__init__(self, timestamp)
         self.name = name
-        self.timestamp = timestamp
-
-    def getTimeStamp(self):
-        return self.timestamp
 
     def getName(self):
         return self.name
-
-    def setTimeStamp(self, timestamp):
-        self.timestamp = timestamp
 
     def setName(self, name):
         self.name = name
@@ -63,18 +56,18 @@ class TroubleInjector(PipelineComponent):
         self.insertChoice=[]
         while self.insertChoice.count(True)<number:
             self.insertChoice.extend(random.sample([True,False],1))
-        self.prevTrail = None
+        self.prevGesture = None
         self.idx = 0
         self.insertionIdx=0
         self.parcel = PipelineParcel()
 
-    def next(self, trail):
+    def next(self, gestureEvent):
         """read in the trails and inject special events
         """
-        if self.prevTrail:
+        if self.prevGesture:
             if self.idx <= len(self.randomSeries):
                 if self.insertChoice[self.insertionIdx]:
-                    timestamp = (self.prevTrail[0].timestamp + trail[0].timestamp) / 2
+                    timestamp = (self.prevGesture.timestamp + gestureEvent.timestamp) / 2
                     injection = SpecialEvent(self.randomSeries[self.idx], timestamp)
                     self.parcel.enqueue(injection)
                     self.idx = self.idx + 1
@@ -85,43 +78,38 @@ class TroubleInjector(PipelineComponent):
                 pass
         else:
             pass
-        self.parcel.enqueue(trail)
-        self.prevTrail = trail
+        self.parcel.enqueue(gestureEvent)
+        self.prevGesture = gestureEvent
         return PipelineParcel()
 
     def handleEOF(self):
         return self.parcel
     
 
-class TroubleReplayer(PipelineComponent):
+class TroubleReplayer(Replayer):
     """Replay finger trails with Heisenbug events injected in between
     """
 
-    def __init__(self):
-        self.mReplayer = MonkeyHelperReplayer()
-        self.device = self.mReplayer.device
-        self.lastTimeStamp = 0
+    def __init__(self, dev):
+        self.device = dev
         self.wifiAgent = WifiAgent(self.device)
         self.cellularAgent = CellularAgent(self.device)
 
-    def next(self, trail):
-        if not isinstance(trail, SpecialEvent):
-            self.mReplayer.lastTimeStamp = self.lastTimeStamp
-            parcel = self.mReplayer.next(trail)
-            self.lastTimeStamp = self.mReplayer.lastTimeStamp
-            return parcel
+    def next(self, specialEvent):
+        name = specialEvent.getName()
+        lastTimeStamp = self.getTimestamp()
+        if specialEvent.timestamp>lastTimeStamp:
+            self.device.sleep(specialEvent.timestamp - lastTimeStamp)
         else:
-            name = trail.getName()
-            lastTimeStamp = self.lastTimeStamp
-            if trail.getTimeStamp()>lastTimeStamp:
-                self.device.sleep(trail.getTimeStamp() - lastTimeStamp)
-            else:
-                pass
-            if name == 'wifi':
-                print 'Injecting wifi event'
-                self.wifiAgent.changeWifiStatus()
-            elif name == 'cellular':
-                self.cellularAgent.toggleCellularDataStatus()
-                print 'Injecting cellular event'
-            self.lastTimeStamp = trail.getTimeStamp()
-            return PipelineParcel()
+            pass
+        if name == 'wifi':
+            print 'Injecting wifi event'
+            self.wifiAgent.changeWifiStatus()
+        elif name == 'cellular':
+            self.cellularAgent.toggleCellularDataStatus()
+            print 'Injecting cellular event'
+        self.setTimestamp(specialEvent.timestamp)
+        return PipelineParcel()
+    
+    def canAccept(self, replayEvent):
+        return isinstance(replayEvent, SpecialEvent)

@@ -25,6 +25,7 @@ an android box. You need monkeyrunner to run scripts once including this module
 import os, subprocess
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
 from Pipeline import PipelineParcel, PipelineComponent
+from Replayer import Replayer, ReplayEvent
 
 def _cmd(cmdlist, mute=True):
     """ A helper function to execute a shell command and selectively mute stdout and stderr
@@ -190,28 +191,47 @@ class EMonkeyDevice:
     def getSystemInfo(self):
         return {"android_version": self.getProperty("build.version.release")}
 
+class GestureReplayEvent(ReplayEvent):
+    def __init__(self, trail):
+        ReplayEvent.__init__(self, trail[0].timestamp)
+        self.trail = trail
+    
 
-class MonkeyHelperReplayer(PipelineComponent):
+class GestureReplayEventWrapper(PipelineComponent):
+    """ Wrap a trail to be a GestureReplayEvent for MonkeyHelperReplayer 
+    """
+    def next(self, specialEvent):
+        pp = PipelineParcel()
+        pp.enqueue(GestureReplayEvent(specialEvent))
+        return pp
+
+
+class MonkeyHelperReplayer(Replayer):
     """ Replay finger trails to an Android box via MonkeyHelper interfaces
     """
+    def __init__(self, dev):
+        self.device = dev
+        self.setTimestamp(0)
 
-    def __init__(self):
-        self.device = EMonkeyDevice()
-        self.lastTimeStamp = 0
-
-    def next(self, trail):
-        """ Takes a finger trail and produces nothing
+    def next(self, gestureReplayEvent):
+        """ Takes a finger specialEvent and produces nothing
         """
-        lastTimeStamp = self.lastTimeStamp
-        if len(trail) <= 0:
-            print "[WARN] perform an empty trail"
-        elif len(trail) == 1:
+        specialEvent = gestureReplayEvent.trail
+        lastTimeStamp = self.getTimestamp()
+        if len(specialEvent) <= 0:
+            print "[WARN] perform an empty specialEvent"
+        elif len(specialEvent) == 1:
             actions = [EMonkeyDevice.DOWN_AND_UP]
         else:
-            actions = [EMonkeyDevice.DOWN] + [EMonkeyDevice.MOVE] * (len(trail) - 2) + [EMonkeyDevice.UP]
-        for count in range(len(trail)):
-            self.device.sleep(trail[count].timestamp - lastTimeStamp)
-            self.device.touch(trail[count].x, trail[count].y, actions[count])
-            lastTimeStamp = trail[count].timestamp
-        self.lastTimeStamp = lastTimeStamp
+            actions = [EMonkeyDevice.DOWN] + [EMonkeyDevice.MOVE] * (len(specialEvent) - 2) + [EMonkeyDevice.UP]
+        for count in range(len(specialEvent)):
+            self.device.sleep(specialEvent[count].timestamp - lastTimeStamp)
+            self.device.touch(specialEvent[count].x, specialEvent[count].y, actions[count])
+            lastTimeStamp = specialEvent[count].timestamp
+        self.setTimestamp(lastTimeStamp)
         return PipelineParcel()
+    
+    def canAccept(self, replayEvent):
+        return isinstance(replayEvent, GestureReplayEvent)
+    
+    

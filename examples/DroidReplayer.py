@@ -37,7 +37,8 @@ sys.path.append(os.path.join(module_path(), '..', 'src'))
 from Pipeline import Pipeline
 import TraceManipulation as dtm
 from TroubleMaker import TroubleReplayer, TroubleInjector
-
+from MonkeyHelper import GestureReplayEventWrapper, EMonkeyDevice, MonkeyHelperReplayer
+from Replayer import CompositeReplayer
 
 def main():
     if len(sys.argv) <= 1:
@@ -51,17 +52,15 @@ def main():
     pl.addStep(dtm.MultiTouchTypeAParser())
     pl.addStep(dtm.RelativeTimingConverter())
     pl.addStep(dtm.FingerDecomposer())
+    pl.addStep(GestureReplayEventWrapper())
     # this step might be necessary for a tablet
     # pl.addStep(dtm.TrailScaler(0.8,0.8))
     # pl.addStep(dtm.TimeScaler(0.25))
-    #pl.addStep(MonkeyHelperReplayer())
-    # pl.addStep(MonkeyHelperReplayer())
-    # if you are testing Heisenbug, replace the upper line
-    # with the following two lines
     pl.addStep(TroubleInjector())
-    pl.addStep(TroubleReplayer())
-    #
-    # pl.addStep(dtm.GenericPrinter())
+    dev = EMonkeyDevice()
+    replayers = [MonkeyHelperReplayer(dev), TroubleReplayer(dev)]
+    pl.addStep(CompositeReplayer(replayers))
+    pl.addStep(dtm.GenericPrinter())
     pl.execute()
     print "Replay finished"
 

@@ -270,8 +270,8 @@ class FingerDecomposer(PipelineComponent):
                 alive[e.tracking_id] = [e]
         self.tracker = alive
         parcel = PipelineParcel()
-        for trail in prev.values():
-            parcel.enqueue(trail)
+        for specialEvent in prev.values():
+            parcel.enqueue(specialEvent)
         return parcel
 
 
@@ -292,13 +292,13 @@ class TrailScaler(PipelineComponent):
         motionEvent.x = tempXValue
         motionEvent.y = tempYValue
 
-    def next(self, trail):
-        """ Takes a trail and produces a scaled trail with given factors
+    def next(self, specialEvent):
+        """ Takes a specialEvent and produces a scaled specialEvent with given factors
         """
-        for e in trail:
+        for e in specialEvent:
             self.scaleXY(e)
         parcel = PipelineParcel()
-        parcel.enqueue(trail)
+        parcel.enqueue(specialEvent)
         return parcel
 
 
@@ -309,13 +309,13 @@ class TimeScaler(PipelineComponent):
     def __init__(self, factor):
         self.factor = factor
 
-    def next(self, trail):
-        """ Takes a trail and produces a time-scaled trail
+    def next(self, specialEvent):
+        """ Takes a specialEvent and produces a time-scaled specialEvent
         """
-        for e in trail:
+        for e in specialEvent:
             e.timestamp *= self.factor
         parcel = PipelineParcel()
-        parcel.enqueue(trail)
+        parcel.enqueue(specialEvent)
         return parcel
 
 
