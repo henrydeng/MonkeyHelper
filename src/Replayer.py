@@ -21,6 +21,8 @@
 from Pipeline import PipelineComponent, PipelineParcel, Pipeline
 
 class Replayer(PipelineComponent):
+    def __init__(self):
+        self.timestamp = 0
     def canAccept(self, replayEvent):
         """ Return True if the replayer can process this replay event
         """
@@ -54,10 +56,19 @@ class CompositeReplayer(Replayer):
             if r.canAccept(replayEvent):
                 return True
         return False
-    def handleEOF(self): # TODO
-        pp = PipelineParcel()
-        pp.enqueue(Pipeline.EOF)
-        return pp
+    def handleEOF(self):
+        # a bit trickier, harvest all objects by calling
+        # all containing replayers
+        mypp = PipelineParcel()
+        for r in self.replayers:
+            pp = r.handleEOF()
+            while not pp.isEmpty():
+                obj = pp.dequeue()
+                if obj != Pipeline.EOF:
+                    mypp.enqueue(obj)
+        if mypp.isEmpty():
+            mypp.enqueue(Pipeline.EOF)
+        return mypp
 
 class ReplayEvent:
     def __init__(self, timestamp):

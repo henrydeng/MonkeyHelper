@@ -210,8 +210,8 @@ class MonkeyHelperReplayer(Replayer):
     """ Replay finger trails to an Android box via MonkeyHelper interfaces
     """
     def __init__(self, dev):
+        Replayer.__init__()
         self.device = dev
-        self.setTimestamp(0)
 
     def next(self, gestureReplayEvent):
         """ Takes a finger specialEvent and produces nothing
