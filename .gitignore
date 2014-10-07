@@ -34,3 +34,9 @@ nosetests.xml
 
 # Misc
 .launch
+
+#PyCharm
+.idea/
+
+#Py-mode
+.ropeproject/

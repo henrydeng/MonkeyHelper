@@ -72,7 +72,7 @@ class HeisenbugInjecter(PipelineComponent):
         if self.prevTrail:
             if self.idx <= len(self.randomSeries):
                 if self.insertChoice[self.insertionIdx]:
-                    timestamp = (self.prevTrail.timestamp + trail.timestamp) / 2
+                    timestamp = (self.prevTrail[0].timestamp + trail[0].timestamp) / 2
                     injection = SpecialEvent(self.randomSeries[self.idx], timestamp)
                     self.parcel.enqueue(injection)
                     self.idx = self.idx + 1

@@ -17,7 +17,6 @@
 # Xinye Lin
 #
 from MonkeyHelperReplayer import MonkeyHelperReplayer
-from MonkeyHelper import EMonkeyDevice
 from Pipeline import PipelineParcel, PipelineComponent
 from HeisenbugInjecter import SpecialEvent
 from WifiAgent import WifiAgent
@@ -27,10 +26,10 @@ from CellularAgent import CellularAgent
 class HeisenbugReplayer(PipelineComponent):
     """Replay finger trails with Heisenbug events injected in between
     """
-    mReplayer = MonkeyHelperReplayer()
 
     def __init__(self):
-        self.device = EMonkeyDevice()
+        self.mReplayer = MonkeyHelperReplayer()
+        self.device = self.mReplayer.device
         self.lastTimeStamp = 0
         self.wifiAgent = WifiAgent(self.device)
         self.cellularAgent = CellularAgent(self.device)
@@ -38,19 +37,21 @@ class HeisenbugReplayer(PipelineComponent):
     def next(self, trail):
         if not isinstance(trail, SpecialEvent):
             self.mReplayer.lastTimeStamp = self.lastTimeStamp
-            parcel = self.mReplayer.next(trail);
+            parcel = self.mReplayer.next(trail)
             self.lastTimeStamp = self.mReplayer.lastTimeStamp
-            print 'here'
             return parcel
         else:
             name = trail.getName()
             lastTimeStamp = self.lastTimeStamp
+            if trail.getTimeStamp()>lastTimeStamp:
+                self.device.sleep(trail.getTimeStamp() - lastTimeStamp)
+            else:
+                pass
             if name == 'wifi':
-                self.device.sleep(trail.getTimeStamp() - lastTimeStamp)
+                print 'Injecting wifi event'
                 self.wifiAgent.changeWifiStatus()
-                self.lastTimeStamp = trail.getTimeStamp()
-            elif name == 'celluar':
-                self.device.sleep(trail.getTimeStamp() - lastTimeStamp)
+            elif name == 'cellular':
                 self.cellularAgent.changeCellularDataStatus()
-                self.lastTimeStamp = trail.getTimeStamp()
+                print 'Injecting cellular event'
+            self.lastTimeStamp = trail.getTimeStamp()
             return PipelineParcel()
