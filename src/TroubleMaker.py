@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Contributors:
-# Xinye Lin
+#   Xinye Lin
 #
 
 """
@@ -23,6 +23,8 @@ This module provides a component to inject hesenbugs into the replay trace
 
 import random
 from Pipeline import PipelineParcel, PipelineComponent
+from MonkeyHelper import MonkeyHelperReplayer
+from Agents import CellularAgent, WifiAgent
 
 
 class SpecialEvent:
@@ -43,7 +45,7 @@ class SpecialEvent:
         self.name = name
 
 
-class HeisenbugInjector(PipelineComponent):
+class TroubleInjector(PipelineComponent):
     """Inject random events into the replay trace,
     the randomness of these events are controlled by a seed, thus reproducible
     """
@@ -89,3 +91,37 @@ class HeisenbugInjector(PipelineComponent):
 
     def handleEOF(self):
         return self.parcel
+    
+
+class TroubleReplayer(PipelineComponent):
+    """Replay finger trails with Heisenbug events injected in between
+    """
+
+    def __init__(self):
+        self.mReplayer = MonkeyHelperReplayer()
+        self.device = self.mReplayer.device
+        self.lastTimeStamp = 0
+        self.wifiAgent = WifiAgent(self.device)
+        self.cellularAgent = CellularAgent(self.device)
+
+    def next(self, trail):
+        if not isinstance(trail, SpecialEvent):
+            self.mReplayer.lastTimeStamp = self.lastTimeStamp
+            parcel = self.mReplayer.next(trail)
+            self.lastTimeStamp = self.mReplayer.lastTimeStamp
+            return parcel
+        else:
+            name = trail.getName()
+            lastTimeStamp = self.lastTimeStamp
+            if trail.getTimeStamp()>lastTimeStamp:
+                self.device.sleep(trail.getTimeStamp() - lastTimeStamp)
+            else:
+                pass
+            if name == 'wifi':
+                print 'Injecting wifi event'
+                self.wifiAgent.changeWifiStatus()
+            elif name == 'cellular':
+                self.cellularAgent.toggleCellularDataStatus()
+                print 'Injecting cellular event'
+            self.lastTimeStamp = trail.getTimeStamp()
+            return PipelineParcel()

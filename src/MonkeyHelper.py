@@ -24,7 +24,7 @@ an android box. You need monkeyrunner to run scripts once including this module
 
 import os, subprocess
 from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
-
+from Pipeline import PipelineParcel, PipelineComponent
 
 def _cmd(cmdlist, mute=True):
     """ A helper function to execute a shell command and selectively mute stdout and stderr
@@ -77,7 +77,7 @@ class EMonkeyDevice:
     UP = MonkeyDevice.UP
     MOVE = MonkeyDevice.MOVE
 
-    def __init__(self, timeout = 20):
+    def __init__(self, timeout = 5):
         self.dev = MonkeyRunner.waitForConnection(timeout)
         self.displayWidth = int(self.getProperty("display.width"))
         self.displayHeight = int(self.getProperty("display.height"))
@@ -190,3 +190,28 @@ class EMonkeyDevice:
     def getSystemInfo(self):
         return {"android_version": self.getProperty("build.version.release")}
 
+
+class MonkeyHelperReplayer(PipelineComponent):
+    """ Replay finger trails to an Android box via MonkeyHelper interfaces
+    """
+
+    def __init__(self):
+        self.device = EMonkeyDevice()
+        self.lastTimeStamp = 0
+
+    def next(self, trail):
+        """ Takes a finger trail and produces nothing
+        """
+        lastTimeStamp = self.lastTimeStamp
+        if len(trail) <= 0:
+            print "[WARN] perform an empty trail"
+        elif len(trail) == 1:
+            actions = [EMonkeyDevice.DOWN_AND_UP]
+        else:
+            actions = [EMonkeyDevice.DOWN] + [EMonkeyDevice.MOVE] * (len(trail) - 2) + [EMonkeyDevice.UP]
+        for count in range(len(trail)):
+            self.device.sleep(trail[count].timestamp - lastTimeStamp)
+            self.device.touch(trail[count].x, trail[count].y, actions[count])
+            lastTimeStamp = trail[count].timestamp
+        self.lastTimeStamp = lastTimeStamp
+        return PipelineParcel()
