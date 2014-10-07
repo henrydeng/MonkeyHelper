@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Contributors:
-# Xinye Lin
+#   Xinye Lin
 #
 from MonkeyHelperReplayer import MonkeyHelperReplayer
 from Pipeline import PipelineParcel, PipelineComponent

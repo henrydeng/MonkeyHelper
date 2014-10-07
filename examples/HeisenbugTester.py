@@ -18,12 +18,26 @@
 #
 
 # Imports the monkeyrunner module used by this program
+import os, sys, inspect
+
+
+def module_path():
+    ''' returns the module path without the use of __file__.
+    from http://stackoverflow.com/questions/729583/getting-file-path-of-imported-module'''
+    return os.path.abspath(os.path.dirname(inspect.getsourcefile(module_path)))
+
+
+sys.path.append(module_path())
+sys.path.append(os.path.join(module_path(), '..', 'src'))
+
 from MonkeyHelper import EMonkeyDevice
 import random
 from Agents import CellularAgent, LogcatAgent, WifiAgent
 
 
 class HeisenbugTester:
+    """ Deprecated
+    """
     def __init__(self, device, package, seed=11, number=10):
         self.device = device
         self.seed = seed

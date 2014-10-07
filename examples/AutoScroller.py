@@ -119,6 +119,7 @@ def main():
     for _ in range(REPEAT_COUNT):
         device.sleep(waitTime)
         device.drag(start, end, duration, pointCount)
+    print 'done'
 
 
 if __name__ == "__main__":
