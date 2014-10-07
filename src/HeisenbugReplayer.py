@@ -18,9 +18,9 @@
 #
 from MonkeyHelperReplayer import MonkeyHelperReplayer
 from Pipeline import PipelineParcel, PipelineComponent
-from HeisenbugInjecter import SpecialEvent
+from HeisenbugInjector import SpecialEvent
 from WifiAgent import WifiAgent
-from CellularAgent import CellularAgent
+from Agents import CellularAgent
 
 
 class HeisenbugReplayer(PipelineComponent):
@@ -51,7 +51,7 @@ class HeisenbugReplayer(PipelineComponent):
                 print 'Injecting wifi event'
                 self.wifiAgent.changeWifiStatus()
             elif name == 'cellular':
-                self.cellularAgent.changeCellularDataStatus()
+                self.cellularAgent.toggleCellularDataStatus()
                 print 'Injecting cellular event'
             self.lastTimeStamp = trail.getTimeStamp()
             return PipelineParcel()

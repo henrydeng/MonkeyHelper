@@ -271,7 +271,7 @@ class FingerDecomposer(PipelineComponent):
         self.tracker = alive
         parcel = PipelineParcel()
         for trail in prev.values():
-            parcel.enqueue(trail)
+            parcel.enqueue(('gesture', trail))
         return parcel
 
 

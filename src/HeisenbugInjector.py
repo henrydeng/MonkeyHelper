@@ -43,7 +43,7 @@ class SpecialEvent:
         self.name = name
 
 
-class HeisenbugInjecter(PipelineComponent):
+class HeisenbugInjector(PipelineComponent):
     """Inject random events into the replay trace,
     the randomness of these events are controlled by a seed, thus reproducible
     """

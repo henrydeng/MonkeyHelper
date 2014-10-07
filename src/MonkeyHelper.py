@@ -121,7 +121,10 @@ class EMonkeyDevice:
         self.dev.removePackage(package)
 
     def shell(self, cmd):
-        return self.dev.shell(cmd).encode('utf-8')
+        r = self.dev.shell(cmd)
+        if r is None:
+            r = ""
+        return r.encode('utf-8')
 
     def startActivity(self, uri=None, action=None, data=None,
                       mimetype=None, categories=[], extras={},
@@ -186,93 +189,4 @@ class EMonkeyDevice:
 
     def getSystemInfo(self):
         return {"android_version": self.getProperty("build.version.release")}
-
-	""" An enriched MonkeyDevice
-	"""
-	DOWN_AND_UP = MonkeyDevice.DOWN_AND_UP
-	DOWN = MonkeyDevice.DOWN
-	UP = MonkeyDevice.UP
-	MOVE = MonkeyDevice.MOVE
-	def __init__(self):
-		self.dev = MonkeyRunner.waitForConnection()
-		self.displayWidth = int(self.getProperty("display.width"))
-		self.displayHeight = int(self.getProperty("display.height"))
-	def broadcastIntent(self, uri, action, data, mimetype, extras, component, flags):
-		self.dev.broadcastIntent(uri, action, data, mimetype, extras, component, flags)
-	def drag(self, start, end, duration, steps):
-		self.dev.drag(start, end, duration, steps)
-		return self
-	def getProperty(self, key):
-		return self.dev.getProperty(key)
-	def getSystemProperty(self, key):
-		return self.dev.getSystemProperty(key)
-	def installPackage(self, path):
-		self.dev.installPackage(path)
-	def instrument(self, className, args):
-		return self.dev.instrument(className, args)
-	def loadImageFromFile(self,fileName):
-		return MonkeyRunner.loadImageFromFile(fileName)
-	def press(self, name, t = DOWN_AND_UP):
-		self.dev.press(name, t)
-		return self
-	def reboot(self, into = "None"):
-		self.dev.reboot(into)
-	def rebootBootloader(self):
-		self.dev.reboot("bootloader")
-	def rebootRecovery(self):
-		self.dev.reboot("Recovery")
-	def removePackage(self, package):
-		self.dev.removePackage(package)
-	def shell(self, cmd):
-		return self.dev.shell(cmd)
-	def startActivity(self, uri = None, action = None, data = None,
-					mimetype = None, categories = [], extras = {},
-					component = None, flags = 0):
-		self.dev.startActivity(uri, action, data, mimetype, categories,
-							extras,	component, flags)
-	def takeSnapshot(self):
-		return self.dev.takeSnapshot()
-	def touch(self, x, y, t = DOWN_AND_UP):
-		self.dev.touch(x, y, t)
-		return self
-	def type(self, message):
-		self.dev.type(message)
-		return self
-	def wake(self):
-		self.dev.wake()
-		return self
-	def slideLeft(self):
-		h = self.displayHeight / 2
-		w1 = self.displayWidth * 7 / 8
-		w2 = self.displayHeight * 1 / 8
-		self.dev.drag ((w1, h), (w2, h), 0.01, 100)
-		return self
-	def slideRight(self):
-		h = self.displayHeight / 2
-		w1 = self.displayWidth * 1 / 8
-		w2 = self.displayHeight * 7 / 8
-		self.dev.drag ((w1, h), (w2, h), 0.01, 100)
-		return self
-	def unlockScreen(self):
-		h = self.displayHeight * 6 / 7
-		self.dev.drag((self.displayWidth / 2, h), (self.displayWidth, h), 0.05, 100)
-		return self
-	def sleep(self, seconds):
-		MonkeyRunner.sleep(seconds)
-		return self
-	def getInstalledPackage(self):
-		raw = str(self.shell("pm list packages"))
-		l = []
-		for line in raw.split('\n'):
-			if line.startswith("package:"):
-				l.append(line.replace("package:", "").rstrip())
-		return l
-	def killAllBgApps(self):
-		self.shell("am kill-all")
-	def pushFile(self, path):
-		return self.shell("push " + path)
-	def pullFile(self, devicePath, localPath):
-		return self.shell("pull %s %s" % (devicePath, localPath))
-	def getSystemInfo(self):
-		return {"android_version": self.getProperty("build.version.release")}
 

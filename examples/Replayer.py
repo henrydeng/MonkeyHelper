@@ -35,9 +35,8 @@ sys.path.append(module_path())
 
 from Pipeline import Pipeline
 import TraceManipulation as dtm
-from MonkeyHelperReplayer import MonkeyHelperReplayer
 from HeisenbugReplayer import HeisenbugReplayer
-from HeisenbugInjecter import HeisenbugInjecter
+from HeisenbugInjector import HeisenbugInjector
 
 
 def main():
@@ -59,7 +58,7 @@ def main():
     # pl.addStep(MonkeyHelperReplayer())
     # if you are testing Heisenbug, replace the upper line
     # with the following two lines
-    pl.addStep(HeisenbugInjecter())
+    pl.addStep(HeisenbugInjector())
     pl.addStep(HeisenbugReplayer())
     #
     # pl.addStep(dtm.GenericPrinter())

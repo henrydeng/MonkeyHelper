@@ -20,9 +20,7 @@
 # Imports the monkeyrunner module used by this program
 from MonkeyHelper import EMonkeyDevice
 import random
-from WifiAgent import WifiAgent
-from CellularAgent import CellularAgent
-from LogcatAgent import LogcatAgent
+from Agents import CellularAgent, LogcatAgent, WifiAgent
 
 
 class HeisenbugTester:
@@ -46,7 +44,7 @@ class HeisenbugTester:
         if specialEvent == 'wifi':
             WifiAgent(self.device).changeWifiStatus()
         elif specialEvent == 'data':
-            CellularAgent(self.device).changeCellularDataStatus()
+            CellularAgent(self.device).toggleCellularDataStatus()
 
 
     def runnerMixEvents(self):
@@ -95,15 +93,15 @@ class HeisenbugTester:
     def clearLog(self):
         return self.logcat.clear()
 
-    def runner(self, type='mix'):
+    def runner(self, mode='mix'):
         #log=open('HeissenbugTesterlog.txt', 'w')
         #logcat=subprocess.Popen(['adb','logcat', '*:W', '|', 'grep', self.package], stdout=log)
         self.clearLog()
-        if type == 'mix':
+        if mode == 'mix':
             result = self.runnerMixEvents()
-        elif type == 'special':
+        elif mode == 'special':
             result = self.runnerSpecialEvents()
-        elif type == 'simple':
+        elif mode == 'simple':
             result = self.runnerSimpleEvents()
         return result, self.dumpLog()
 
