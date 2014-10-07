@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Contributors:
-# Mingyuan Xia
+#   Mingyuan Xia
 #   Ran Shu
 #
 

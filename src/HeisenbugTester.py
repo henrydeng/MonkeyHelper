@@ -1,5 +1,5 @@
 #
-# Copyright 2014 Mingyuan Xia and others
+# Copyright 2014 Mingyuan Xia (http://mxia.me) and others
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
