@@ -91,7 +91,7 @@ class TroubleReplayer(Replayer):
     """
 
     def __init__(self, dev):
-        Replayer.__init__()
+        Replayer.__init__(self)
         self.device = dev
         self.wifiAgent = WifiAgent(self.device)
         self.cellularAgent = CellularAgent(self.device)
